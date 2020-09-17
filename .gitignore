@@ -1,0 +1,15 @@
+# Temporary files
+*.pyc
+*.pyo
+Thumbs.db
+*~
+
+# IDE
+/.idea/
+
+# Testing
+Pipfile*
+.tox/
+.coverage/
+tests/home/userdata/addon_data/
+.env

@@ -1,0 +1,49 @@
+name: CI
+on:
+  - pull_request
+  - push
+jobs:
+  tests:
+    name: Add-on testing
+    runs-on: ubuntu-latest
+    env:
+      PYTHONIOENCODING: utf-8
+      PYTHONPATH: ${{ github.workspace }}/resources/lib
+      KODI_HOME: ${{ github.workspace }}/tests/home
+      KODI_INTERACTIVE: 0
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [2.7, 3.5, 3.6, 3.7, 3.8]
+    steps:
+      - name: Check out ${{ github.sha }} from repository ${{ github.repository }}
+        uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          sudo apt-get install gettext
+          sudo pip install coverage --install-option="--install-scripts=/usr/bin"
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Run pylint
+        run: make check-pylint
+      - name: Run tox
+        run: make check-tox
+      - name: Check translations
+        run: make check-translations
+      - name: Run unit tests
+        run: coverage run -m unittest discover
+        env:
+          ADDON_PASSWORD: ${{ secrets.ADDON_PASSWORD }}
+          ADDON_USERNAME: ${{ secrets.ADDON_USERNAME }}
+#      - name: Run addon service for 10 seconds
+#        run: timeout --preserve-status -s SIGINT 10 coverage run -a service_entry.py
+#        env:
+#          ADDON_PASSWORD: ${{ secrets.ADDON_PASSWORD }}
+#          ADDON_USERNAME: ${{ secrets.ADDON_USERNAME }}
+      - name: Upload code coverage to CodeCov
+        uses: codecov/codecov-action@v1
+        continue-on-error: true
