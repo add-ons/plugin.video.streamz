@@ -16,6 +16,7 @@ from resources.lib.streamz.auth import AccountStorage, Auth
 _LOGGER = logging.getLogger(__name__)
 
 
+@unittest.skipUnless(kodiutils.get_setting('username') and kodiutils.get_setting('password'), 'Skipping since we have no credentials.')
 class TestAuth(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestAuth, self).__init__(*args, **kwargs)
@@ -26,7 +27,6 @@ class TestAuth(unittest.TestCase):
                           kodiutils.get_tokens_path())
         self._api = Api(self._auth)
 
-    @unittest.skipUnless(kodiutils.get_setting('username') and kodiutils.get_setting('password'), 'Skipping since we have no credentials.')
     def test_login(self):
         account = self._auth.login()
         self.assertIsInstance(account, AccountStorage)

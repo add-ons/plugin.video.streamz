@@ -13,6 +13,7 @@ from resources.lib.streamz.api import Api
 from resources.lib.streamz.auth import Auth
 
 
+@unittest.skipUnless(kodiutils.get_setting('username') and kodiutils.get_setting('password'), 'Skipping since we have no credentials.')
 class TestApi(unittest.TestCase):
     """ Tests for Streamz API """
 
@@ -25,7 +26,6 @@ class TestApi(unittest.TestCase):
                           kodiutils.get_tokens_path())
         self._api = Api(self._auth)
 
-    @unittest.skipUnless(kodiutils.get_setting('username') and kodiutils.get_setting('password'), 'Skipping since we have no credentials.')
     def test_catalog(self):
         categories = self._api.get_categories()
         self.assertTrue(categories)
@@ -33,7 +33,6 @@ class TestApi(unittest.TestCase):
         items = self._api.get_items()
         self.assertTrue(items)
 
-    @unittest.skipUnless(kodiutils.get_setting('username') and kodiutils.get_setting('password'), 'Skipping since we have no credentials.')
     def test_recommendations(self):
         main_recommendations = self._api.get_recommendations(STOREFRONT_MAIN)
         self.assertIsInstance(main_recommendations, list)
@@ -44,17 +43,14 @@ class TestApi(unittest.TestCase):
         serie_recommendations = self._api.get_recommendations(STOREFRONT_SERIES)
         self.assertIsInstance(serie_recommendations, list)
 
-    @unittest.skipUnless(kodiutils.get_setting('username') and kodiutils.get_setting('password'), 'Skipping since we have no credentials.')
     def test_continuewatching(self):
         mylist = self._api.get_swimlane('continue-watching')
         self.assertIsInstance(mylist, list)
 
-    @unittest.skipUnless(kodiutils.get_setting('username') and kodiutils.get_setting('password'), 'Skipping since we have no credentials.')
     def test_mylist(self):
         mylist = self._api.get_swimlane('my-list')
         self.assertIsInstance(mylist, list)
 
-    @unittest.skipUnless(kodiutils.get_setting('username') and kodiutils.get_setting('password'), 'Skipping since we have no credentials.')
     def test_search(self):
         results = self._api.do_search('huis')
         self.assertIsInstance(results, list)

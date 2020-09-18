@@ -19,7 +19,9 @@ Je kan de [laatste release](https://github.com/add-ons/plugin.video.streamz/rele
 ## Features
 
 De volgende features worden ondersteund:
-* TODO
+* Afspelen van films en series
+* Volledig overzicht van alle content
+* Zoeken in de volledige catalogus
 
 ## Disclaimer
 

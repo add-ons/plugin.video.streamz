@@ -18,6 +18,7 @@ from resources.lib.streamz.stream import Stream, ResolvedStream
 _LOGGER = logging.getLogger(__name__)
 
 
+@unittest.skipUnless(kodiutils.get_setting('username') and kodiutils.get_setting('password'), 'Skipping since we have no credentials.')
 class TestStream(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestStream, self).__init__(*args, **kwargs)
@@ -32,7 +33,6 @@ class TestStream(unittest.TestCase):
     def tearDown(self):
         xbmc.Player().stop()
 
-    @unittest.skipUnless(kodiutils.get_setting('username') and kodiutils.get_setting('password'), 'Skipping since we have no credentials.')
     def test_stream(self):
         stream = self._stream.get_stream('movies', '6af62507-229b-41bb-afda-8519c4ccb4fe')
         self.assertIsInstance(stream, ResolvedStream)
