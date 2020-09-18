@@ -13,8 +13,8 @@ from resources.lib.streamz.exceptions import InvalidTokenException
 _LOGGER = logging.getLogger(__name__)
 
 # Setup a static session that can be reused for all calls
-_SESSION = requests.Session()
-_SESSION.headers = {
+SESSION = requests.Session()
+SESSION.headers = {
     'User-Agent': 'STREAMZ/1.0.0 (be.dpgmedia.streamz; build:12544; Android 23) okhttp/4.6.0',
     'x-app-version': '8',
     'x-persgroep-mobile-app': 'true',
@@ -133,7 +133,7 @@ def _request(method, url, params=None, form=None, data=None, token=None, profile
     if profile:
         headers['x-dpp-profile'] = profile
 
-    response = _SESSION.request(method, url, params=params, data=form, json=data, headers=headers)
+    response = SESSION.request(method, url, params=params, data=form, json=data, headers=headers)
 
     # Set encoding to UTF-8 if no charset is indicated in http headers (https://github.com/psf/requests/issues/1604)
     if not response.encoding:
