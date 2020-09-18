@@ -299,7 +299,7 @@ class Auth:
         response.raise_for_status()
 
         # Get JWT from cookies
-        self._account.jwt_token = util._SESSION.cookies.get('lfvp_auth')
+        self._account.jwt_token = util.SESSION.cookies.get('lfvp_auth')
         self._save_cache()
 
         return self._account

@@ -33,7 +33,8 @@ class Api:
         self._auth = auth
         self._tokens = self._auth.login()
 
-    def _mode(self):
+    @staticmethod
+    def _mode():
         """ Return the mode that should be used for API calls """
         return 'streamz'
         # TODO

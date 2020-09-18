@@ -191,7 +191,7 @@ def show_listing(title_items, category=None, sort=None, content=None, cache=True
     xbmcplugin.endOfDirectory(routing.handle, succeeded, cacheToDisc=cache)
 
 
-def play(stream, license_key=None, title=None, art_dict=None, info_dict=None, prop_dict=None):
+def play(stream, license_key=None, title=None, art_dict=None, info_dict=None, prop_dict=None, stream_dict=None):
     """Play the given stream"""
     from resources.lib.addon import routing
 
@@ -202,8 +202,8 @@ def play(stream, license_key=None, title=None, art_dict=None, info_dict=None, pr
         play_item.setInfo(type='video', infoLabels=info_dict)
     if prop_dict:
         play_item.setProperties(prop_dict)
-    if prop_dict:
-        play_item.setProperties(prop_dict)
+    if stream_dict:
+        play_item.addStreamInfo('video', stream_dict)
 
     # Setup Inputstream Adaptive
     if kodi_version_major() >= 19:
@@ -605,3 +605,17 @@ def invalidate_cache(ttl=None):
         if ttl and now - xbmcvfs.Stat(filepath).st_mtime() < ttl:
             continue
         xbmcvfs.delete(filepath)
+
+
+def notify(sender, message, data):
+    """ Send a notification to Kodi using JSON RPC """
+    result = jsonrpc(method='JSONRPC.NotifyAll', params=dict(
+        sender=sender,
+        message=message,
+        data=data,
+    ))
+    if result.get('result') != 'OK':
+        _LOGGER.error('Failed to send notification: {error}', error=result.get('error').get('message'))
+        return False
+    _LOGGER.debug('Succesfully sent notification')
+    return True
