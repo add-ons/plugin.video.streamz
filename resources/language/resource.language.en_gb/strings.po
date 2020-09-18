@@ -142,7 +142,7 @@ msgstr ""
 ### MESSAGES
 
 msgctxt "#30701"
-msgid "You need to configure your credentials before you can access the content of Streamz. Do you want to enter them now?"
+msgid "You need to configure your credentials before you can access the content of Streamz."
 msgstr ""
 
 msgctxt "#30702"
@@ -191,10 +191,6 @@ msgstr ""
 
 msgctxt "#30716"
 msgid "Updating metadata ({index}/{total})..."
-msgstr ""
-
-msgctxt "#30717"
-msgid "This program is not available in the Streamz catalogue."
 msgstr ""
 
 

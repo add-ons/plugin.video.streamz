@@ -8,6 +8,7 @@ import logging
 import routing
 
 from resources.lib import kodilogging, kodiutils
+from resources.lib.streamz.exceptions import NoLoginException, InvalidLoginException, LoginErrorException
 
 kodilogging.config()
 routing = routing.Plugin()  # pylint: disable=invalid-name
@@ -17,14 +18,32 @@ _LOGGER = logging.getLogger(__name__)
 @routing.route('/')
 def index():
     """ Show the profile selection, or go to the main menu. """
-    if kodiutils.get_setting_bool('auto_login') and kodiutils.get_setting('username') and kodiutils.get_setting('password') and kodiutils.get_setting(
-            'profile'):
-        # We have credentials
-        show_main_menu()
+    try:
+        if (kodiutils.get_setting_bool('auto_login') and
+                kodiutils.get_setting('username') and
+                kodiutils.get_setting('password') and
+                kodiutils.get_setting('profile')):
+            # We have credentials
+            show_main_menu()
 
-    else:
-        # Ask the user for the profile to use
-        select_profile()
+        else:
+            # Ask the user for the profile to use
+            select_profile()
+
+    except NoLoginException:
+        kodiutils.ok_dialog(message=kodiutils.localize(30701))  # You need to configure your credentials...
+        kodiutils.open_settings()
+        kodiutils.container_refresh()
+
+    except InvalidLoginException:
+        kodiutils.ok_dialog(message=kodiutils.localize(30203))  # Your credentials are not valid!
+        kodiutils.open_settings()
+        kodiutils.end_of_directory()
+
+    except LoginErrorException as exc:
+        kodiutils.ok_dialog(message=kodiutils.localize(30702, code=exc.code))  # Unknown error while logging in: {code}
+        kodiutils.open_settings()
+        kodiutils.end_of_directory()
 
 
 @routing.route('/menu')

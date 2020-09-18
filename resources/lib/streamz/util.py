@@ -8,7 +8,7 @@ import logging
 import requests
 from requests import HTTPError
 
-from resources.lib.streamz.exceptions import InvalidTokenException
+from resources.lib.streamz.exceptions import InvalidTokenException, InvalidLoginException
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -40,6 +40,8 @@ def http_get(url, params=None, token=None, profile=None, headers=None):
     except HTTPError as ex:
         if ex.response.status_code == 401:
             raise InvalidTokenException
+        if ex.response.status_code == 403:
+            raise InvalidLoginException
         raise
 
 
@@ -62,6 +64,8 @@ def http_post(url, params=None, form=None, data=None, token=None, profile=None, 
     except HTTPError as ex:
         if ex.response.status_code == 401:
             raise InvalidTokenException
+        if ex.response.status_code == 403:
+            raise InvalidLoginException
         raise
 
 
@@ -84,6 +88,8 @@ def http_put(url, params=None, form=None, data=None, token=None, profile=None, h
     except HTTPError as ex:
         if ex.response.status_code == 401:
             raise InvalidTokenException
+        if ex.response.status_code == 403:
+            raise InvalidLoginException
         raise
 
 
@@ -104,6 +110,8 @@ def http_delete(url, params=None, token=None, profile=None, headers=None):
     except HTTPError as ex:
         if ex.response.status_code == 401:
             raise InvalidTokenException
+        if ex.response.status_code == 403:
+            raise InvalidLoginException
         raise
 
 

@@ -10,7 +10,7 @@ import re
 from hashlib import md5
 
 from resources.lib.streamz import util, API_ENDPOINT, Profile
-from resources.lib.streamz.exceptions import LoginErrorException
+from resources.lib.streamz.exceptions import LoginErrorException, NoLoginException
 
 try:  # Python 3
     import jwt
@@ -64,6 +64,9 @@ class Auth:
         self._username = username
         self._password = password
         self._profile = profile
+
+        if not self._username or not self._password:
+            raise NoLoginException()
 
         self._token_path = token_path
 
@@ -122,14 +125,6 @@ class Auth:
         if force or not self._account.is_valid_token():
             # Do actual login
             self._web_login()
-
-        # # Select the default profile if we have selected none
-        # if self._profile:
-        #     self._account.profile = self._profile
-        # else:
-        #     default_profile = self.get_profiles()[0]
-        #     self._account.profile = default_profile.key
-        # self._save_cache()
 
         return self._account
 
@@ -253,30 +248,23 @@ class Auth:
         :rtype str
         """
         # Start login flow
-        response = util.http_get('https://account.streamz.be/login')
-        response.raise_for_status()
+        util.http_get('https://account.streamz.be/login')
 
         # Send login credentials
-        response = util.http_post('https://login.streamz.be/co/authenticate',
-                                  data={
-                                      "client_id": self.CLIENT_ID,
-                                      "username": self._username,
-                                      "password": self._password,
-                                      "realm": "Username-Password-Authentication",
-                                      "credential_type": "http://auth0.com/oauth/grant-type/password-realm"
-                                  },
-                                  headers={
-                                      'Origin': 'https://account.streamz.be',
-                                      'Referer': 'https://account.streamz.be',
-                                  })
-        response.raise_for_status()
-
-        # TODO: throw nicer exceptions when auth has failed
-        # Returns 403 in case of invalid credentials
-        # {"error":"access_denied","error_description":"Wrong email or password."}
+        util.http_post('https://login.streamz.be/co/authenticate',
+                       data={
+                           "client_id": self.CLIENT_ID,
+                           "username": self._username,
+                           "password": self._password,
+                           "realm": "Username-Password-Authentication",
+                           "credential_type": "http://auth0.com/oauth/grant-type/password-realm"
+                       },
+                       headers={
+                           'Origin': 'https://account.streamz.be',
+                           'Referer': 'https://account.streamz.be',
+                       })
 
         response = util.http_get('https://www.streamz.be/streamz/aanmelden')
-        response.raise_for_status()
 
         # Extract state and code
         matches_state = re.search(r'name="state" value="([^"]+)', response.text)
@@ -292,11 +280,10 @@ class Auth:
             raise LoginErrorException(code=102)  # Could not extract authentication code
 
         # Okay, final stage. We now need to POST our state and code to get a valid JWT.
-        response = util.http_post('https://www.streamz.be/streamz/login-callback', form={
+        util.http_post('https://www.streamz.be/streamz/login-callback', form={
             'state': state,
             'code': code,
         })
-        response.raise_for_status()
 
         # Get JWT from cookies
         self._account.jwt_token = util.SESSION.cookies.get('lfvp_auth')

@@ -9,7 +9,6 @@ from resources.lib import kodiutils
 from resources.lib.kodiutils import TitleItem
 from resources.lib.streamz.api import Api
 from resources.lib.streamz.auth import Auth
-from resources.lib.streamz.exceptions import InvalidLoginException, LoginErrorException, ApiUpdateRequired
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -29,25 +28,7 @@ class Authentication:
         """ Show your profiles
         :type key: str
         """
-        try:
-            profiles = self._auth.get_profiles()
-        except InvalidLoginException:
-            kodiutils.ok_dialog(message=kodiutils.localize(30203))  # Your credentials are not valid!
-            kodiutils.open_settings()
-            return
-
-        except LoginErrorException as exc:
-            kodiutils.ok_dialog(message=kodiutils.localize(30702, code=exc.code))  # Unknown error while logging in: {code}
-            kodiutils.open_settings()
-            return
-
-        except ApiUpdateRequired:
-            kodiutils.ok_dialog(message=kodiutils.localize(30705))  # The Streamz Service has been updated...
-            return
-
-        except Exception as exc:  # pylint: disable=broad-except
-            kodiutils.ok_dialog(message="%s" % exc)
-            return
+        profiles = self._auth.get_profiles()
 
         # Show warning when you have no profiles
         if not profiles:

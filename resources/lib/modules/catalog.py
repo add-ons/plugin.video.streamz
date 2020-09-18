@@ -10,7 +10,7 @@ from resources.lib.kodiutils import TitleItem
 from resources.lib.modules.menu import Menu
 from resources.lib.streamz.api import Api, CACHE_PREVENT
 from resources.lib.streamz.auth import Auth
-from resources.lib.streamz.exceptions import UnavailableException, ApiUpdateRequired
+from resources.lib.streamz.exceptions import UnavailableException
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -28,16 +28,7 @@ class Catalog:
 
     def show_catalog(self):
         """ Show the catalog """
-        try:
-            categories = self._api.get_categories()
-        except ApiUpdateRequired:
-            kodiutils.ok_dialog(message=kodiutils.localize(30705))  # The Streamz Service has been updated...
-            return
-
-        except Exception as ex:  # pylint: disable=broad-except
-            _LOGGER.error("%s", ex)
-            kodiutils.ok_dialog(message="%s" % ex)
-            return
+        categories = self._api.get_categories()
 
         listing = []
         for cat in categories:
@@ -56,16 +47,7 @@ class Catalog:
         """ Show a category in the catalog
         :type category: str
         """
-        try:
-            items = self._api.get_items(category)
-        except ApiUpdateRequired:
-            kodiutils.ok_dialog(message=kodiutils.localize(30705))  # The Streamz Service has been updated...
-            return
-
-        except Exception as ex:  # pylint: disable=broad-except
-            _LOGGER.error("%s", ex)
-            kodiutils.ok_dialog(message="%s" % ex)
-            return
+        items = self._api.get_items(category)
 
         listing = []
         for item in items:
@@ -82,7 +64,7 @@ class Catalog:
         try:
             program_obj = self._api.get_program(program, cache=CACHE_PREVENT)  # Use CACHE_PREVENT since we want fresh data
         except UnavailableException:
-            kodiutils.ok_dialog(message=kodiutils.localize(30717))  # This program is not available in the Streamz catalogue.
+            kodiutils.ok_dialog(message=kodiutils.localize(30712))  # The video is unavailable and can't be played right now.
             kodiutils.end_of_directory()
             return
 
@@ -144,7 +126,7 @@ class Catalog:
         try:
             program_obj = self._api.get_program(program)  # Use CACHE_AUTO since the data is just refreshed in show_program
         except UnavailableException:
-            kodiutils.ok_dialog(message=kodiutils.localize(30717))  # This program is not available in the Streamz catalogue.
+            kodiutils.ok_dialog(message=kodiutils.localize(30712))  # The video is unavailable and can't be played right now.
             kodiutils.end_of_directory()
             return
 
@@ -164,16 +146,7 @@ class Catalog:
         """ Show the recommendations
         :type storefront: str
         """
-        try:
-            recommendations = self._api.get_recommendations(storefront)
-        except ApiUpdateRequired:
-            kodiutils.ok_dialog(message=kodiutils.localize(30705))  # The Streamz Service has been updated...
-            return
-
-        except Exception as ex:  # pylint: disable=broad-except
-            _LOGGER.error("%s", ex)
-            kodiutils.ok_dialog(message="%s" % ex)
-            return
+        recommendations = self._api.get_recommendations(storefront)
 
         listing = []
         for cat in recommendations:
@@ -193,16 +166,7 @@ class Catalog:
         :type storefront: str
         :type category: str
         """
-        try:
-            recommendations = self._api.get_recommendations(storefront)
-        except ApiUpdateRequired:
-            kodiutils.ok_dialog(message=kodiutils.localize(30705))  # The Streamz Service has been updated...
-            return
-
-        except Exception as ex:  # pylint: disable=broad-except
-            _LOGGER.error("%s", ex)
-            kodiutils.ok_dialog(message="%s" % ex)
-            return
+        recommendations = self._api.get_recommendations(storefront)
 
         listing = []
         for cat in recommendations:
@@ -218,16 +182,7 @@ class Catalog:
 
     def show_mylist(self):
         """ Show the items in "My List" """
-        try:
-            mylist = self._api.get_swimlane('my-list')
-        except ApiUpdateRequired:
-            kodiutils.ok_dialog(message=kodiutils.localize(30705))  # The Streamz Service has been updated...
-            return
-
-        except Exception as ex:  # pylint: disable=broad-except
-            _LOGGER.error("%s", ex)
-            kodiutils.ok_dialog(message="%s" % ex)
-            return
+        mylist = self._api.get_swimlane('my-list')
 
         listing = []
         for item in mylist:
@@ -256,16 +211,7 @@ class Catalog:
 
     def show_continuewatching(self):
         """ Show the items in "Continue Watching" """
-        try:
-            mylist = self._api.get_swimlane('continue-watching')
-        except ApiUpdateRequired:
-            kodiutils.ok_dialog(message=kodiutils.localize(30705))  # The Streamz Service has been updated...
-            return
-
-        except Exception as ex:  # pylint: disable=broad-except
-            _LOGGER.error("%s", ex)
-            kodiutils.ok_dialog(message="%s" % ex)
-            return
+        mylist = self._api.get_swimlane('continue-watching')
 
         listing = []
         for item in mylist:

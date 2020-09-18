@@ -61,7 +61,7 @@ msgstr "Verder kijken"
 
 msgctxt "#30020"
 msgid "Continue watching where you left off"
-msgstr "Kijk verder waar je gebleven was"
+msgstr "Kijk verder waar u gebleven was"
 
 
 ### SUBMENUS
@@ -97,11 +97,11 @@ msgstr "[B][COLOR lightblue]Kids zone[/COLOR][/B]"
 
 msgctxt "#30202"
 msgid "Credentials are correct!"
-msgstr "De Streamz inloggegevens werken perfect!"
+msgstr "De inloggegevens werken perfect!"
 
 msgctxt "#30203"
 msgid "Your credentials are not valid!"
-msgstr "De Streamz inloggegevens zijn onjuist!"
+msgstr "De inloggegevens zijn onjuist!"
 
 msgctxt "#30204"
 msgid "All seasons"
@@ -143,8 +143,8 @@ msgstr "Alle leeftijden"
 ### MESSAGES
 
 msgctxt "#30701"
-msgid "You need to configure your credentials before you can access the content of Streamz. Do you want to enter them now?"
-msgstr "Je moet je inloggegevens configureren voordat je Streamz kan gebruiken. Wil je dit nu doen?"
+msgid "You need to configure your credentials before you can access the content of Streamz."
+msgstr "U moet uw inloggegevens configureren voordat u Streamz kan gebruiken."
 
 msgctxt "#30702"
 msgid "Unknown error while logging in: {code}"
@@ -152,11 +152,11 @@ msgstr "Onbekende fout bij het inloggen: {code}"
 
 msgctxt "#30703"
 msgid "Your account has no profiles defined. Please login on vtm.be/vtmgo and create a profile."
-msgstr "Je account heeft geen profielen. Gelieve in te loggen op vtm.be/vtmgo en een profiel aan te maken."
+msgstr "Uw account heeft geen profielen. Gelieve in te loggen op vtm.be/vtmgo en een profiel aan te maken."
 
 msgctxt "#30704"
 msgid "This video may be geo-blocked, or your account is already being used currently."
-msgstr "Deze video werd wellicht geografisch geblokkeerd, of je account is reeds in gebruik."
+msgstr "Deze video werd wellicht geografisch geblokkeerd, of uw account is reeds in gebruik."
 
 msgctxt "#30705"
 msgid "The Streamz Service has been updated, but this add-on hasn't been modified yet for these changes. Please check for an update."
@@ -172,7 +172,7 @@ msgstr "Video is geografisch geblokkeerd"
 
 msgctxt "#30710"
 msgid "This video is geo-blocked and can't be played from your location."
-msgstr "Deze video is geografisch geblokkeerd en kan niet worden afgespeeld vanaf je locatie."
+msgstr "Deze video is geografisch geblokkeerd en kan niet worden afgespeeld vanaf uw locatie."
 
 msgctxt "#30711"
 msgid "Unavailable video"
@@ -193,10 +193,6 @@ msgstr "Vernieuwen metadata..."
 msgctxt "#30716"
 msgid "Updating metadata ({index}/{total})..."
 msgstr "Vernieuwen metadata ({index}/{total})..."
-
-msgctxt "#30717"
-msgid "This program is not available in the Streamz catalogue."
-msgstr "Dit programma is niet beschikbaar in de Streamz catalogus."
 
 ### SETTINGS
 msgctxt "#30800"
