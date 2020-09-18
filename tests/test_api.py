@@ -7,9 +7,8 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import unittest
 
-import xbmc
-
 from resources.lib import kodiutils
+from resources.lib.streamz import STOREFRONT_MAIN, STOREFRONT_MOVIES, STOREFRONT_SERIES
 from resources.lib.streamz.api import Api
 from resources.lib.streamz.auth import Auth
 
@@ -26,14 +25,6 @@ class TestApi(unittest.TestCase):
                           kodiutils.get_tokens_path())
         self._api = Api(self._auth)
 
-    def setUp(self):
-        # Don't warn that we don't close our HTTPS connections, this is on purpose.
-        # warnings.simplefilter("ignore", ResourceWarning)
-        pass
-
-    def tearDown(self):
-        xbmc.Player().stop()
-
     @unittest.skipUnless(kodiutils.get_setting('username') and kodiutils.get_setting('password'), 'Skipping since we have no credentials.')
     def test_catalog(self):
         categories = self._api.get_categories()
@@ -42,40 +33,26 @@ class TestApi(unittest.TestCase):
         items = self._api.get_items()
         self.assertTrue(items)
 
-        # # Movies
-        # movie = next(a for a in items if isinstance(a, Movie) and not a.geoblocked)
-        # info = self._vtmgo.get_movie(movie.movie_id)
-        # self.assertTrue(info)
-        # try:
-        #     self._player.play('movies', info.movie_id)
-        # except StreamGeoblockedException:
-        #     pass
-        #
-        # # Programs
-        # program = next(a for a in items if isinstance(a, Program) and not a.geoblocked)
-        # info = self._vtmgo.get_program(program.program_id)
-        # self.assertTrue(info)
-        #
-        # season = list(info.seasons.values())[0]
-        # episode = list(season.episodes.values())[0]
-        # info = self._vtmgo.get_episode(episode.episode_id)
-        # self.assertTrue(info)
-        # try:
-        #     self._player.play('episodes', info.episode_id)
-        # except StreamGeoblockedException:
-        #     pass
+    @unittest.skipUnless(kodiutils.get_setting('username') and kodiutils.get_setting('password'), 'Skipping since we have no credentials.')
+    def test_recommendations(self):
+        main_recommendations = self._api.get_recommendations(STOREFRONT_MAIN)
+        self.assertIsInstance(main_recommendations, list)
 
-    # def test_recommendations(self):
-    #     recommendations = self._vtmgo.get_recommendations()
-    #     self.assertTrue(recommendations)
-    #
-    # def test_mylist(self):
-    #     mylist = self._vtmgo.get_swimlane('my-list')
-    #     self.assertIsInstance(mylist, list)
-    #
-    # def test_continuewatching(self):
-    #     mylist = self._vtmgo.get_swimlane('continue-watching')
-    #     self.assertIsInstance(mylist, list)
+        movie_recommendations = self._api.get_recommendations(STOREFRONT_MOVIES)
+        self.assertIsInstance(movie_recommendations, list)
+
+        serie_recommendations = self._api.get_recommendations(STOREFRONT_SERIES)
+        self.assertIsInstance(serie_recommendations, list)
+
+    @unittest.skipUnless(kodiutils.get_setting('username') and kodiutils.get_setting('password'), 'Skipping since we have no credentials.')
+    def test_continuewatching(self):
+        mylist = self._api.get_swimlane('continue-watching')
+        self.assertIsInstance(mylist, list)
+
+    @unittest.skipUnless(kodiutils.get_setting('username') and kodiutils.get_setting('password'), 'Skipping since we have no credentials.')
+    def test_mylist(self):
+        mylist = self._api.get_swimlane('my-list')
+        self.assertIsInstance(mylist, list)
 
     @unittest.skipUnless(kodiutils.get_setting('username') and kodiutils.get_setting('password'), 'Skipping since we have no credentials.')
     def test_search(self):

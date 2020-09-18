@@ -87,18 +87,6 @@ msgstr "Ga naar programma"
 
 
 ### CODE
-msgctxt "#30200"
-msgid "Using a SOCKS proxy requires the PySocks library (script.module.pysocks) installed."
-msgstr "De PySocks library (script.module.pysocks) is nodig voor het gebruik van een SOCKS proxy."
-
-msgctxt "#30201"
-msgid "[B][COLOR lightblue]Kids zone[/COLOR][/B]"
-msgstr "[B][COLOR lightblue]Kids zone[/COLOR][/B]"
-
-msgctxt "#30202"
-msgid "Credentials are correct!"
-msgstr "De inloggegevens werken perfect!"
-
 msgctxt "#30203"
 msgid "Your credentials are not valid!"
 msgstr "De inloggegevens zijn onjuist!"
@@ -153,14 +141,6 @@ msgstr "Onbekende fout bij het inloggen: {code}"
 msgctxt "#30703"
 msgid "Your account has no profiles defined. Please login on vtm.be/vtmgo and create a profile."
 msgstr "Uw account heeft geen profielen. Gelieve in te loggen op vtm.be/vtmgo en een profiel aan te maken."
-
-msgctxt "#30704"
-msgid "This video may be geo-blocked, or your account is already being used currently."
-msgstr "Deze video werd wellicht geografisch geblokkeerd, of uw account is reeds in gebruik."
-
-msgctxt "#30705"
-msgid "The Streamz Service has been updated, but this add-on hasn't been modified yet for these changes. Please check for an update."
-msgstr "De Streamz Service is geüpdate, maar deze add-on is helaas nog niet aangepast hiervoor. Gelieve te controleren of er een update beschikbaar is."
 
 msgctxt "#30708"
 msgid "Please restart Kodi."

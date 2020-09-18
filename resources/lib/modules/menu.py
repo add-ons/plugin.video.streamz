@@ -13,6 +13,7 @@ from resources.lib.streamz.auth import Auth
 
 _LOGGER = logging.getLogger(__name__)
 
+
 class Menu:
     """ Menu code """
 

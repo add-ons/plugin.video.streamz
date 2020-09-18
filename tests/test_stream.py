@@ -8,6 +8,8 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import logging
 import unittest
 
+import xbmc
+
 from resources.lib import kodiutils
 from resources.lib.streamz.api import Api
 from resources.lib.streamz.auth import Auth
@@ -27,8 +29,11 @@ class TestStream(unittest.TestCase):
         self._api = Api(self._auth)
         self._stream = Stream(self._auth)
 
+    def tearDown(self):
+        xbmc.Player().stop()
+
     @unittest.skipUnless(kodiutils.get_setting('username') and kodiutils.get_setting('password'), 'Skipping since we have no credentials.')
-    def test_login(self):
+    def test_stream(self):
         stream = self._stream.get_stream('movies', '6af62507-229b-41bb-afda-8519c4ccb4fe')
         self.assertIsInstance(stream, ResolvedStream)
 

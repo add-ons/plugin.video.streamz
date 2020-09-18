@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """ Streamz API """
 
+from __future__ import absolute_import, division, unicode_literals
+
 API_ENDPOINT = 'https://lfvp-api.dpgmedia.net'
 
 # These seem to be hardcoded

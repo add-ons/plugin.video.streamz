@@ -86,18 +86,6 @@ msgstr ""
 
 
 ### CODE
-msgctxt "#30200"
-msgid "Using a SOCKS proxy requires the PySocks library (script.module.pysocks) installed."
-msgstr ""
-
-msgctxt "#30201"
-msgid "[B][COLOR lightblue]Kids zone[/COLOR][/B]"
-msgstr ""
-
-msgctxt "#30202"
-msgid "Credentials are correct!"
-msgstr ""
-
 msgctxt "#30203"
 msgid "Your credentials are not valid!"
 msgstr ""
@@ -151,14 +139,6 @@ msgstr ""
 
 msgctxt "#30703"
 msgid "Your account has no profiles defined. Please login on vtm.be/vtmgo and create a profile."
-msgstr ""
-
-msgctxt "#30704"
-msgid "This video may be geo-blocked, or your account is already being used currently."
-msgstr ""
-
-msgctxt "#30705"
-msgid "The Streamz Service has been updated, but this add-on hasn't been modified yet for these changes. Please check for an update."
 msgstr ""
 
 msgctxt "#30708"

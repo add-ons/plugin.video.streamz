@@ -19,10 +19,10 @@ _LOGGER = logging.getLogger(__name__)
 def index():
     """ Show the profile selection, or go to the main menu. """
     try:
-        if (kodiutils.get_setting_bool('auto_login') and
-                kodiutils.get_setting('username') and
-                kodiutils.get_setting('password') and
-                kodiutils.get_setting('profile')):
+        if (kodiutils.get_setting_bool('auto_login')
+                and kodiutils.get_setting('username')
+                and kodiutils.get_setting('password')
+                and kodiutils.get_setting('profile')):
             # We have credentials
             show_main_menu()
 
