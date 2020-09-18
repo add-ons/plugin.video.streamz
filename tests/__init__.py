@@ -28,7 +28,10 @@ if sys.version_info[0] == 2:
 
 # Set credentials based on environment data
 # Use the .env file with Pipenv to make this work nicely during development
-if os.environ.get('ADDON_USERNAME') and os.environ.get('ADDON_PASSWORD'):
-    ADDON = xbmcaddon.Addon()
+ADDON = xbmcaddon.Addon()
+if os.environ.get('ADDON_USERNAME'):
     ADDON.setSetting('username', os.environ.get('ADDON_USERNAME'))
+if os.environ.get('ADDON_PASSWORD'):
     ADDON.setSetting('password', os.environ.get('ADDON_PASSWORD'))
+if os.environ.get('ADDON_PROFILE'):
+    ADDON.setSetting('profile', os.environ.get('ADDON_PROFILE'))

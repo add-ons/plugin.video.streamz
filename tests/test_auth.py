@@ -18,23 +18,23 @@ _LOGGER = logging.getLogger(__name__)
 
 @unittest.skipUnless(kodiutils.get_setting('username') and kodiutils.get_setting('password'), 'Skipping since we have no credentials.')
 class TestAuth(unittest.TestCase):
-    def __init__(self, *args, **kwargs):
-        super(TestAuth, self).__init__(*args, **kwargs)
 
-        self._auth = Auth(kodiutils.get_setting('username'),
-                          kodiutils.get_setting('password'),
-                          kodiutils.get_setting('profile'),
-                          kodiutils.get_tokens_path())
-        self._api = Api(self._auth)
+    @classmethod
+    def setUpClass(cls):
+        cls.auth = Auth(kodiutils.get_setting('username'),
+                        kodiutils.get_setting('password'),
+                        kodiutils.get_setting('profile'),
+                        kodiutils.get_tokens_path())
+        cls.api = Api(cls.auth)
 
     def test_login(self):
-        account = self._auth.login()
+        account = self.auth.login()
         self.assertIsInstance(account, AccountStorage)
 
-        profiles = self._auth.get_profiles()
+        profiles = self.auth.get_profiles()
         self.assertIsInstance(profiles[0], Profile)
 
-        api = Api(self._auth)
+        api = Api(self.auth)
         config = api.get_config()
         self.assertIsInstance(config, dict)
 

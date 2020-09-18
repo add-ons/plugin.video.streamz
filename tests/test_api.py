@@ -17,42 +17,41 @@ from resources.lib.streamz.auth import Auth
 class TestApi(unittest.TestCase):
     """ Tests for Streamz API """
 
-    def __init__(self, *args, **kwargs):
-        super(TestApi, self).__init__(*args, **kwargs)
-
-        self._auth = Auth(kodiutils.get_setting('username'),
-                          kodiutils.get_setting('password'),
-                          kodiutils.get_setting('profile'),
-                          kodiutils.get_tokens_path())
-        self._api = Api(self._auth)
+    @classmethod
+    def setUpClass(cls):
+        cls.auth = Auth(kodiutils.get_setting('username'),
+                        kodiutils.get_setting('password'),
+                        kodiutils.get_setting('profile'),
+                        kodiutils.get_tokens_path())
+        cls.api = Api(cls.auth)
 
     def test_catalog(self):
-        categories = self._api.get_categories()
+        categories = self.api.get_categories()
         self.assertTrue(categories)
 
-        items = self._api.get_items()
+        items = self.api.get_items()
         self.assertTrue(items)
 
     def test_recommendations(self):
-        main_recommendations = self._api.get_recommendations(STOREFRONT_MAIN)
+        main_recommendations = self.api.get_recommendations(STOREFRONT_MAIN)
         self.assertIsInstance(main_recommendations, list)
 
-        movie_recommendations = self._api.get_recommendations(STOREFRONT_MOVIES)
+        movie_recommendations = self.api.get_recommendations(STOREFRONT_MOVIES)
         self.assertIsInstance(movie_recommendations, list)
 
-        serie_recommendations = self._api.get_recommendations(STOREFRONT_SERIES)
+        serie_recommendations = self.api.get_recommendations(STOREFRONT_SERIES)
         self.assertIsInstance(serie_recommendations, list)
 
     def test_continuewatching(self):
-        mylist = self._api.get_swimlane('continue-watching')
+        mylist = self.api.get_swimlane('continue-watching')
         self.assertIsInstance(mylist, list)
 
     def test_mylist(self):
-        mylist = self._api.get_swimlane('my-list')
+        mylist = self.api.get_swimlane('my-list')
         self.assertIsInstance(mylist, list)
 
     def test_search(self):
-        results = self._api.do_search('huis')
+        results = self.api.do_search('huis')
         self.assertIsInstance(results, list)
 
 
