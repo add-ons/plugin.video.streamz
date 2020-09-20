@@ -59,10 +59,11 @@ class Auth:
 
     # CLIENT_ID = '6sMlUPtp8BsujHOvtkvtC9DJv0gZjP3p'  # Android APP
 
-    def __init__(self, username, password, profile, token_path):
+    def __init__(self, username, password, loginprovider, profile, token_path):
         """ Initialise object """
         self._username = username
         self._password = password
+        self.loginprovider = loginprovider
         self._profile = profile
 
         if not self._username or not self._password:
@@ -250,43 +251,79 @@ class Auth:
         # Start login flow
         util.http_get('https://account.streamz.be/login')
 
-        # Send login credentials
-        util.http_post('https://login.streamz.be/co/authenticate',
-                       data={
-                           "client_id": self.CLIENT_ID,
-                           "username": self._username,
-                           "password": self._password,
-                           "realm": "Username-Password-Authentication",
-                           "credential_type": "http://auth0.com/oauth/grant-type/password-realm"
-                       },
-                       headers={
-                           'Origin': 'https://account.streamz.be',
-                           'Referer': 'https://account.streamz.be',
-                       })
+        if self.loginprovider == 'Streamz':
 
-        response = util.http_get('https://www.streamz.be/streamz/aanmelden')
+            # Send login credentials
+            util.http_post('https://login.streamz.be/co/authenticate',
+                           data={
+                               "client_id": self.CLIENT_ID,
+                               "username": self._username,
+                               "password": self._password,
+                               "realm": "Username-Password-Authentication",
+                               "credential_type": "http://auth0.com/oauth/grant-type/password-realm"
+                           },
+                           headers={
+                               'Origin': 'https://account.streamz.be',
+                               'Referer': 'https://account.streamz.be',
+                           })
 
-        # Extract state and code
-        matches_state = re.search(r'name="state" value="([^"]+)', response.text)
-        if matches_state:
-            state = matches_state.group(1)
-        else:
-            raise LoginErrorException(code=101)  # Could not extract authentication state
+            response = util.http_get('https://www.streamz.be/streamz/aanmelden')
 
-        matches_code = re.search(r'name="code" value="([^"]+)', response.text)
-        if matches_code:
-            code = matches_code.group(1)
-        else:
-            raise LoginErrorException(code=102)  # Could not extract authentication code
+            # Extract state and code
+            matches_state = re.search(r'name="state" value="([^"]+)', response.text)
+            if matches_state:
+                state = matches_state.group(1)
+            else:
+                raise LoginErrorException(code=101)  # Could not extract authentication state
 
-        # Okay, final stage. We now need to POST our state and code to get a valid JWT.
-        util.http_post('https://www.streamz.be/streamz/login-callback', form={
-            'state': state,
-            'code': code,
-        })
+            matches_code = re.search(r'name="code" value="([^"]+)', response.text)
+            if matches_code:
+                code = matches_code.group(1)
+            else:
+                raise LoginErrorException(code=102)  # Could not extract authentication code
 
-        # Get JWT from cookies
-        self._account.jwt_token = util.SESSION.cookies.get('lfvp_auth')
+            # Okay, final stage. We now need to POST our state and code to get a valid JWT.
+            util.http_post('https://www.streamz.be/streamz/login-callback', form={
+                'state': state,
+                'code': code,
+            })
+
+            # Get JWT from cookies
+            self._account.jwt_token = util.SESSION.cookies.get('lfvp_auth')
+
+        elif self.loginprovider == 'Telenet':
+
+            # Generate random state and nonce parameters
+            import random
+            import string
+            state = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(32))
+            nonce = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(32))
+
+            # Obtain authorization
+            util.http_get('https://login.streamz.be/authorize',
+                          params={
+                              'audience': 'https://streamz.eu.auth0.com/api/v2/',
+                              'domain': 'login.streamz.be',
+                              'client_id': self.CLIENT_ID,
+                              'response_type': 'id_token token',
+                              'redirect_uri': 'https://account.streamz.be/callback',
+                              'scope': 'read:current_user profile email openid',
+                              'connection': 'TN',
+                              'state': state,
+                              'nonce': nonce,
+                              'auth0Client': 'eyJuYW1lIjoiYXV0aDAuanMiLCJ2ZXJzaW9uIjoiOS4xMy4yIn0=',  # base64 encoded {"name":"auth0.js","version":"9.13.2"}
+                          })
+
+            # Send login credentials
+            response = util.http_post('https://login.prd.telenet.be/openid/login.do',
+                                      form={
+                                          'j_username': self._username,
+                                          'j_password': self._password,
+                                          'rememberme': 'true',
+                                      })
+
+            self._account.jwt_token = response.url.split('access_token=')[1].split('&')[0]
+
         self._save_cache()
 
         return self._account

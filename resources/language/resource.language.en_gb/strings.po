@@ -191,15 +191,27 @@ msgctxt "#30805"
 msgid "Password"
 msgstr ""
 
+msgctxt "#30807"
+msgid "Login provider"
+msgstr ""
+
 msgctxt "#30809"
-msgid "Profile"
+msgid "Streamz"
 msgstr ""
 
 msgctxt "#30810"
-msgid "Always use the current profile"
+msgid "Telenet"
 msgstr ""
 
 msgctxt "#30811"
+msgid "Profile"
+msgstr ""
+
+msgctxt "#30812"
+msgid "Always use the current profile"
+msgstr ""
+
+msgctxt "#30813"
 msgid "Current profile"
 msgstr ""
 
