@@ -23,6 +23,10 @@ class Stream:
         self._auth = auth
         self._tokens = self._auth.login()
 
+    def _mode(self):
+        """ Return the mode that should be used for API calls """
+        return 'streamz-kids' if self._tokens.product == 'STREAMZ_KIDS' else 'streamz'
+
     def get_stream(self, stream_type, stream_id):
         """ Return a ResolvedStream based on the stream type and id.
         :type stream_type: str
@@ -82,9 +86,9 @@ class Stream:
         """
 
         if strtype == 'movies':
-            url = API_ENDPOINT + '/streamz/play/movie/%s' % stream_id
+            url = API_ENDPOINT + '/%s/play/movie/%s' % (self._mode(), stream_id)
         elif strtype == 'episodes':
-            url = API_ENDPOINT + '/streamz/play/episode/%s' % stream_id
+            url = API_ENDPOINT + '/%s/play/episode/%s' % (self._mode(), stream_id)
         else:
             raise Exception('Unknown stream type: %s' % strtype)
 

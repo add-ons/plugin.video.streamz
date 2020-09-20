@@ -34,7 +34,7 @@ class TestStream(unittest.TestCase):
         xbmc.Player().stop()
 
     def test_stream(self):
-        stream = self.stream.get_stream('movies', '6af62507-229b-41bb-afda-8519c4ccb4fe')
+        stream = self.stream.get_stream('movies', 'dc980ef6-b9f6-4d99-bbf2-5dfa2f9b7867')
         self.assertIsInstance(stream, ResolvedStream)
 
 

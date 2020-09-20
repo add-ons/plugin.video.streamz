@@ -138,7 +138,7 @@ msgid "Unknown error while logging in: {code}"
 msgstr ""
 
 msgctxt "#30703"
-msgid "Your account has no profiles defined. Please login on vtm.be/vtmgo and create a profile."
+msgid "Your account has no profiles defined. Please login on www.streamz.be/streamz and create a profile."
 msgstr ""
 
 msgctxt "#30708"

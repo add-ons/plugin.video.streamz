@@ -7,7 +7,7 @@ import logging
 
 from resources.lib import kodiutils
 from resources.lib.kodiutils import TitleItem
-from resources.lib.streamz import Movie, Program, Episode, STOREFRONT_MAIN, STOREFRONT_MOVIES, STOREFRONT_SERIES
+from resources.lib.streamz import Movie, Program, Episode, STOREFRONT_MAIN, STOREFRONT_MOVIES, STOREFRONT_SERIES, STOREFRONT_KIDS
 from resources.lib.streamz.api import Api, CONTENT_TYPE_MOVIE, CONTENT_TYPE_PROGRAM
 from resources.lib.streamz.auth import Auth
 
@@ -25,45 +25,59 @@ class Menu:
                           kodiutils.get_tokens_path())
         self._api = Api(self._auth)
 
-    @staticmethod
-    def show_mainmenu():
+    def show_mainmenu(self):
         """ Show the main menu """
         listing = []
-        listing.append(TitleItem(
-            title=kodiutils.localize(30015),  # Recommendations
-            path=kodiutils.url_for('show_recommendations', storefront=STOREFRONT_MAIN),
-            art_dict=dict(
-                icon='DefaultFavourites.png',
-                fanart=kodiutils.get_addon_info('fanart'),
-            ),
-            info_dict=dict(
-                plot=kodiutils.localize(30016),
-            ),
-        ))
 
-        listing.append(TitleItem(
-            title=kodiutils.localize(30003),  # Movies
-            path=kodiutils.url_for('show_recommendations', storefront=STOREFRONT_MOVIES),
-            art_dict=dict(
-                icon='DefaultMovies.png',
-                fanart=kodiutils.get_addon_info('fanart'),
-            ),
-            info_dict=dict(
-                plot=kodiutils.localize(30004),
-            ),
-        ))
+        if self._auth.login().product == 'STREAMZ':
+            listing.append(TitleItem(
+                title=kodiutils.localize(30015),  # Recommendations
+                path=kodiutils.url_for('show_recommendations', storefront=STOREFRONT_MAIN),
+                art_dict=dict(
+                    icon='DefaultFavourites.png',
+                    fanart=kodiutils.get_addon_info('fanart'),
+                ),
+                info_dict=dict(
+                    plot=kodiutils.localize(30016),
+                ),
+            ))
 
-        listing.append(TitleItem(
-            title=kodiutils.localize(30005),  # Series
-            path=kodiutils.url_for('show_recommendations', storefront=STOREFRONT_SERIES),
-            art_dict=dict(
-                icon='DefaultTVShows.png',
-                fanart=kodiutils.get_addon_info('fanart'),
-            ),
-            info_dict=dict(
-                plot=kodiutils.localize(30006),
-            ),
-        ))
+            listing.append(TitleItem(
+                title=kodiutils.localize(30003),  # Movies
+                path=kodiutils.url_for('show_recommendations', storefront=STOREFRONT_MOVIES),
+                art_dict=dict(
+                    icon='DefaultMovies.png',
+                    fanart=kodiutils.get_addon_info('fanart'),
+                ),
+                info_dict=dict(
+                    plot=kodiutils.localize(30004),
+                ),
+            ))
+
+            listing.append(TitleItem(
+                title=kodiutils.localize(30005),  # Series
+                path=kodiutils.url_for('show_recommendations', storefront=STOREFRONT_SERIES),
+                art_dict=dict(
+                    icon='DefaultTVShows.png',
+                    fanart=kodiutils.get_addon_info('fanart'),
+                ),
+                info_dict=dict(
+                    plot=kodiutils.localize(30006),
+                ),
+            ))
+
+        elif self._auth.login().product == 'STREAMZ_KIDS':
+            listing.append(TitleItem(
+                title=kodiutils.localize(30015),  # Recommendations
+                path=kodiutils.url_for('show_recommendations', storefront=STOREFRONT_KIDS),
+                art_dict=dict(
+                    icon='DefaultFavourites.png',
+                    fanart=kodiutils.get_addon_info('fanart'),
+                ),
+                info_dict=dict(
+                    plot=kodiutils.localize(30016),
+                ),
+            ))
 
         if kodiutils.get_setting_bool('interface_show_az'):
             listing.append(TitleItem(
