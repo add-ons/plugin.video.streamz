@@ -76,19 +76,18 @@ class Authentication:
         title = profile.name
 
         # Convert the Streamz Profile color to a matching Kodi color
-        # TODO: fix color map
         color_map = {
-            '#64D8E3': 'skyblue',
-            '#4DFF76': 'mediumspringgreen',
-            '#0243FF': 'blue',
-            '#831CFA': 'blueviolet',
-            '#FFB24D': 'khaki',
-            '#FF4DD5': 'violet',
-            '#FFB002': 'gold',
-            '#FF0257': 'crimson',
+            '#F20D3A': 'red',
+            '#FF0A5A': 'crimson',
+            '#FF4B00': 'darkorange',
+            '#FED71F': 'gold',
+            '#5EFF74': 'palegreen',
+            '#0DF2E8': 'turquoise',
+            '#226DFF': 'dodgerblue',
+            '#6900CC': 'blueviolet',
         }
         if color_map.get(profile.color.upper()):
-            title = '[COLOR %s]%s[/COLOR]' % (color_map.get(profile.color), kodiutils.to_unicode(title))
+            title = '[COLOR %s]%s[/COLOR]' % (color_map.get(profile.color.upper()), kodiutils.to_unicode(title))
 
         # Append (Kids)
         if profile.product == 'STREAMZ_KIDS':
