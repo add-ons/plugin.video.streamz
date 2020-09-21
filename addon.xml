@@ -15,9 +15,16 @@
     </extension>
     <extension point="xbmc.service" library="service_entry.py"/>
     <extension point="xbmc.addon.metadata">
+        <summary lang="en_GB">Access the Streamz catalogue</summary>
+        <description lang="en_GB">Streamz is a video-on-demand platform offering Flemish content from DPG Media, Telenet and VRT, but also offers 'Home of HBO' content and blockbuster movies.</description>
+        <disclaimer lang="en_GB">This add-on is not officially commissioned/supported by Streamz BV and is provided 'as is' without any warranty of any kind. The Streamz name and Streamz logo are property of Streamz BV and are used according to the 'fair use' policy.</disclaimer>
+        <summary lang="nl_NL">Krijg toegang tot de Streamz catalogus</summary>
+        <description lang="nl_NL">Streamz is een video-on-demand platform dat toegang biedt tot Vlaamse series en films van DPG Media, Telenet en VRT, maar ook 'Home of HBO' en de laatste films.</description>
+        <disclaimer lang="nl_NL">Deze add-on wordt niet ondersteund door Streamz BV, en wordt aangeboden 'as is', zonder enige garantie. De Streamz naam en Streamz logo zijn eigendom van Streamz BV en worden gebruikt in overeenstemming met de 'fair use' regels.</disclaimer>
         <platform>all</platform>
         <license>GPL-3.0</license>
-        <news>v0.0.1</news>
+        <news>v0.0.1 (2020-09-21)
+- Initial release</news>
         <source>https://github.com/add-ons/plugin.video.streamz</source>
         <assets>
             <icon>resources/icon.png</icon>
