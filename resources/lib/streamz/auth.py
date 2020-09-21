@@ -13,8 +13,10 @@ from resources.lib.streamz import util, API_ENDPOINT, Profile
 from resources.lib.streamz.exceptions import LoginErrorException, NoLoginException, NoTelenetSubscriptionException, NoStreamzSubscriptionException
 
 try:  # Python 3
+    from urllib.parse import parse_qs, urlsplit
     import jwt
 except ImportError:  # Python 2
+    from urlparse import parse_qs, urlsplit
     # The package is named pyjwt in Kodi 18: https://github.com/lottaboost/script.module.pyjwt/pull/1
     import pyjwt as jwt
 
@@ -295,9 +297,6 @@ class Auth:
                                          'login_ticket': login_data.get('login_ticket'),
                                      })
 
-            # Extract login_token
-            self._account.login_token = response.url.split('access_token=')[1].split('&')[0]
-
         elif self._loginprovider == LOGIN_TELENET:
 
             # Obtain authorization
@@ -323,10 +322,15 @@ class Auth:
                                           'rememberme': 'true',
                                       })
 
-            self._account.login_token = response.url.split('access_token=')[1].split('&')[0]
-
         else:
             raise Exception('Unsupported login method: %s' % self._loginprovider)
+
+        # Extract login_token
+        params = parse_qs(urlsplit(response.url).fragment)
+        if params:
+            self._account.login_token = params.get('access_token')[0]
+        else:
+            raise LoginErrorException(code=103)  # Could not extract parameter
 
         # Check login token
         self.check_status()
