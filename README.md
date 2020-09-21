@@ -23,6 +23,16 @@ De volgende features worden ondersteund:
 * Volledig overzicht van alle content
 * Zoeken in de volledige catalogus
 
+## Screenshots
+
+<table>
+  <tr>
+    <td><img src="resources/screenshot01.jpg" width=270></td>
+    <td><img src="resources/screenshot02.jpg" width=270></td>
+    <td><img src="resources/screenshot03.jpg" width=270></td>
+  </tr>
+ </table>
+
 ## Disclaimer
 
 Deze add-on wordt niet ondersteund door Streamz BV, en wordt aangeboden 'as is', zonder enige garantie.
