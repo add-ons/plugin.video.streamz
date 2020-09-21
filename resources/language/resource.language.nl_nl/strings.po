@@ -87,6 +87,14 @@ msgstr "Ga naar programma"
 
 
 ### CODE
+msgctxt "#30201"
+msgid "Your Streamz account has no active subscription!"
+msgstr "Uw Streamz account heeft geen geldig abbonement!"
+
+msgctxt "#30202"
+msgid "Your Telenet account has no active subscription!"
+msgstr "Uw Telenet account heeft geen geldig abbonement!"
+
 msgctxt "#30203"
 msgid "Your credentials are not valid!"
 msgstr "De inloggegevens zijn onjuist!"

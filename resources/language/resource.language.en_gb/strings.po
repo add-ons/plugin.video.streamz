@@ -86,6 +86,14 @@ msgstr ""
 
 
 ### CODE
+msgctxt "#30201"
+msgid "Your Streamz account has no active subscription!"
+msgstr ""
+
+msgctxt "#30202"
+msgid "Your Telenet account has no active subscription!"
+msgstr ""
+
 msgctxt "#30203"
 msgid "Your credentials are not valid!"
 msgstr ""
