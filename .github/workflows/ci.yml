@@ -39,6 +39,7 @@ jobs:
         env:
           ADDON_PASSWORD: ${{ secrets.ADDON_PASSWORD }}
           ADDON_USERNAME: ${{ secrets.ADDON_USERNAME }}
+          ADDON_PROFILE: ${{ secrets.ADDON_PROFILE }}
 #      - name: Run addon service for 10 seconds
 #        run: timeout --preserve-status -s SIGINT 10 coverage run -a service_entry.py
 #        env:

@@ -33,17 +33,14 @@ class Api:
         self._auth = auth
         self._tokens = self._auth.login()
 
-    @staticmethod
-    def _mode():
+    def _mode(self):
         """ Return the mode that should be used for API calls """
-        return 'streamz'
-        # TODO
-        # return 'streamz' if self.get_product() == 'VTM_GO_KIDS' else 'vtmgo'
+        return 'streamz-kids' if self._tokens.product == 'STREAMZ_KIDS' else 'streamz'
 
     def get_config(self):
         """ Returns the config for the app """
         response = util.http_get(API_ENDPOINT + '/config', token=self._tokens.jwt_token)
-        info = json.loads(response.content)
+        info = json.loads(response.text)
 
         # This contains a player.updateIntervalSeconds that could be used to notify Streamz about the playing progress
         return info
@@ -53,7 +50,7 @@ class Api:
         response = util.http_get(API_ENDPOINT + '/%s/storefronts/%s' % (self._mode(), storefront),
                                  token=self._tokens.jwt_token,
                                  profile=self._tokens.profile)
-        recommendations = json.loads(response.content)
+        recommendations = json.loads(response.text)
 
         categories = []
         for cat in recommendations.get('rows', []):
@@ -84,10 +81,10 @@ class Api:
                                  profile=self._tokens.profile)
 
         # Result can be empty
-        if not response.content:
+        if not response.text:
             return []
 
-        result = json.loads(response.content)
+        result = json.loads(response.text)
 
         items = []
         for item in result.get('teasers'):
@@ -121,7 +118,7 @@ class Api:
         response = util.http_get(API_ENDPOINT + '/%s/catalog/filters' % self._mode(),
                                  token=self._tokens.jwt_token,
                                  profile=self._tokens.profile)
-        info = json.loads(response.content)
+        info = json.loads(response.text)
 
         categories = []
         for item in info.get('catalogFilters', []):
@@ -142,7 +139,7 @@ class Api:
                                  params={'pageSize': 2000, 'filter': quote(category) if category else None},
                                  token=self._tokens.jwt_token,
                                  profile=self._tokens.profile)
-        info = json.loads(response.content)
+        info = json.loads(response.text)
         content = info.get('pagedTeasers', {}).get('content', [])
 
         items = []
@@ -174,7 +171,7 @@ class Api:
             response = util.http_get(API_ENDPOINT + '/%s/movies/%s' % (self._mode(), movie_id),
                                      token=self._tokens.jwt_token,
                                      profile=self._tokens.profile)
-            info = json.loads(response.content)
+            info = json.loads(response.text)
             movie = info.get('movie', {})
             kodiutils.set_cache(['movie', movie_id], movie)
 
@@ -212,7 +209,7 @@ class Api:
             response = util.http_get(API_ENDPOINT + '/%s/programs/%s' % (self._mode(), program_id),
                                      token=self._tokens.jwt_token,
                                      profile=self._tokens.profile)
-            info = json.loads(response.content)
+            info = json.loads(response.text)
             program = info.get('program', {})
             kodiutils.set_cache(['program', program_id], program)
 
@@ -310,7 +307,7 @@ class Api:
         response = util.http_get(API_ENDPOINT + '/%s/play/episode/%s' % (self._mode(), episode_id),
                                  token=self._tokens.jwt_token,
                                  profile=self._tokens.profile)
-        episode = json.loads(response.content)
+        episode = json.loads(response.text)
 
         # Extract next episode info if available
         next_playable = episode.get('nextPlayable')
@@ -341,7 +338,7 @@ class Api:
         response = util.http_get(API_ENDPOINT + '/%s/search/?query=%s' % (self._mode(), quote(search)),
                                  token=self._tokens.jwt_token,
                                  profile=self._tokens.profile)
-        results = json.loads(response.content)
+        results = json.loads(response.text)
 
         items = []
         for category in results.get('results', []):
@@ -352,15 +349,6 @@ class Api:
                 elif item.get('target', {}).get('type') == CONTENT_TYPE_PROGRAM:
                     items.append(self._parse_program_teaser(item))
         return items
-
-    @staticmethod
-    def get_product():
-        """ Return the product that is currently selected. """
-        profile = kodiutils.get_setting('profile')
-        try:
-            return profile.split(':')[1]
-        except (IndexError, AttributeError):
-            return None
 
     def _parse_movie_teaser(self, item):
         """ Parse the movie json and return an Movie instance.

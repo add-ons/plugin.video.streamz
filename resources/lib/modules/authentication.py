@@ -32,7 +32,7 @@ class Authentication:
 
         # Show warning when you have no profiles
         if not profiles:
-            # Your account has no profiles defined. Please login on vtm.be/vtmgo and create a Profile.
+            # Your account has no profiles defined. Please login on www.streamz.be/streamz and create a profile.
             kodiutils.ok_dialog(message=kodiutils.localize(30703))
             kodiutils.end_of_directory()
             return
@@ -45,9 +45,7 @@ class Authentication:
         if key:
             profile = [x for x in profiles if x.key == key][0]
             _LOGGER.debug('Setting profile to %s', profile)
-            # kodiutils.set_setting('profile', '%s:%s' % (profile.key, profile.product))
-            # TODO: fix this
-            kodiutils.set_setting('profile', profile.key)
+            kodiutils.set_setting('profile', '%s:%s' % (profile.key, profile.product))
             kodiutils.set_setting('profile_name', profile.name)
 
             kodiutils.redirect(kodiutils.url_for('show_main_menu'))

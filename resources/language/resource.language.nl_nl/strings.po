@@ -139,8 +139,8 @@ msgid "Unknown error while logging in: {code}"
 msgstr "Onbekende fout bij het inloggen: {code}"
 
 msgctxt "#30703"
-msgid "Your account has no profiles defined. Please login on vtm.be/vtmgo and create a profile."
-msgstr "Uw account heeft geen profielen. Gelieve in te loggen op vtm.be/vtmgo en een profiel aan te maken."
+msgid "Your account has no profiles defined. Please login on www.streamz.be/streamz and create a profile."
+msgstr "Uw account heeft geen profielen. Gelieve in te loggen op www.streamz.be/streamz en een profiel aan te maken."
 
 msgctxt "#30708"
 msgid "Please restart Kodi."

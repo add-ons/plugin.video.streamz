@@ -25,6 +25,7 @@ class AccountStorage:
     """ Data storage for account info """
     jwt_token = ''
     profile = ''
+    product = ''
 
     # Credentials hash
     hash = ''
@@ -77,9 +78,17 @@ class Auth:
         # Do login so we have valid tokens
         self.login()
 
-        # Apply profile
+        # Apply profile and product
         if profile:
-            self._account.profile = profile
+            parts = profile.split(':')
+            try:
+                self._account.profile = parts[0]
+            except (IndexError, AttributeError):
+                self._account.profile = None
+            try:
+                self._account.product = parts[1]
+            except (IndexError, AttributeError):
+                self._account.product = None
 
     def _check_credentials_change(self):
         """ Check if credentials have changed """
@@ -93,7 +102,7 @@ class Auth:
     def get_profiles(self, products='STREAMZ,STREAMZ_KIDS'):
         """ Returns the available profiles """
         response = util.http_get(API_ENDPOINT + '/profiles', {'products': products}, token=self._account.jwt_token)
-        result = json.loads(response.content)
+        result = json.loads(response.text)
 
         profiles = [
             Profile(
@@ -240,7 +249,7 @@ class Auth:
     #     })
     #     response.raise_for_status()
     #
-    #     _LOGGER.debug(response.content)
+    #     _LOGGER.debug(response.text)
     #     _LOGGER.debug(response.url)
 
     def _web_login(self):
