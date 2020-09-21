@@ -14,9 +14,12 @@ from resources.lib.streamz.exceptions import LoginErrorException, NoLoginExcepti
 
 try:  # Python 3
     from urllib.parse import parse_qs, urlsplit
-    import jwt
 except ImportError:  # Python 2
     from urlparse import parse_qs, urlsplit
+
+try:  # Python 3
+    import jwt
+except ImportError:  # Python 2
     # The package is named pyjwt in Kodi 18: https://github.com/lottaboost/script.module.pyjwt/pull/1
     import pyjwt as jwt
 
