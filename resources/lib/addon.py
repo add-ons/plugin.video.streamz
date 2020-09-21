@@ -8,7 +8,8 @@ import logging
 import routing
 
 from resources.lib import kodilogging, kodiutils
-from resources.lib.streamz.exceptions import NoLoginException, InvalidLoginException, LoginErrorException
+from resources.lib.streamz.exceptions import NoLoginException, InvalidLoginException, LoginErrorException, NoTelenetSubscriptionException, \
+    NoStreamzSubscriptionException
 
 kodilogging.config()
 routing = routing.Plugin()  # pylint: disable=invalid-name
@@ -38,6 +39,14 @@ def index():
     except InvalidLoginException:
         kodiutils.ok_dialog(message=kodiutils.localize(30203))  # Your credentials are not valid!
         kodiutils.open_settings()
+        kodiutils.end_of_directory()
+
+    except NoStreamzSubscriptionException:
+        kodiutils.ok_dialog(message=kodiutils.localize(30201))  # Your Streamz account has no valid subscription!
+        kodiutils.end_of_directory()
+
+    except NoTelenetSubscriptionException:
+        kodiutils.ok_dialog(message=kodiutils.localize(30202))  # Your Telenet account has no valid subscription!
         kodiutils.end_of_directory()
 
     except LoginErrorException as exc:

@@ -22,6 +22,7 @@ class Player:
         """ Initialise object """
         self._auth = Auth(kodiutils.get_setting('username'),
                           kodiutils.get_setting('password'),
+                          kodiutils.get_setting('loginprovider'),
                           kodiutils.get_setting('profile'),
                           kodiutils.get_tokens_path())
         self._api = Api(self._auth)

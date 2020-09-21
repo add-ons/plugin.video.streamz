@@ -23,6 +23,7 @@ class TestAuth(unittest.TestCase):
     def setUpClass(cls):
         cls.auth = Auth(kodiutils.get_setting('username'),
                         kodiutils.get_setting('password'),
+                        kodiutils.get_setting('loginprovider'),
                         kodiutils.get_setting('profile'),
                         kodiutils.get_tokens_path())
         cls.api = Api(cls.auth)

@@ -10,7 +10,12 @@ import re
 from hashlib import md5
 
 from resources.lib.streamz import util, API_ENDPOINT, Profile
-from resources.lib.streamz.exceptions import LoginErrorException, NoLoginException
+from resources.lib.streamz.exceptions import LoginErrorException, NoLoginException, NoTelenetSubscriptionException, NoStreamzSubscriptionException
+
+try:  # Python 3
+    from urllib.parse import parse_qs, urlsplit
+except ImportError:  # Python 2
+    from urlparse import parse_qs, urlsplit
 
 try:  # Python 3
     import jwt
@@ -20,9 +25,13 @@ except ImportError:  # Python 2
 
 _LOGGER = logging.getLogger(__name__)
 
+LOGIN_STREAMZ = '0'
+LOGIN_TELENET = '1'
+
 
 class AccountStorage:
     """ Data storage for account info """
+    login_token = ''
     jwt_token = ''
     profile = ''
     product = ''
@@ -60,10 +69,11 @@ class Auth:
 
     # CLIENT_ID = '6sMlUPtp8BsujHOvtkvtC9DJv0gZjP3p'  # Android APP
 
-    def __init__(self, username, password, profile, token_path):
+    def __init__(self, username, password, loginprovider, profile, token_path):
         """ Initialise object """
         self._username = username
         self._password = password
+        self._loginprovider = loginprovider
         self._profile = profile
 
         if not self._username or not self._password:
@@ -93,7 +103,7 @@ class Auth:
     def _check_credentials_change(self):
         """ Check if credentials have changed """
         old_hash = self._account.hash
-        new_hash = md5((self._username + ':' + self._password).encode('utf-8')).hexdigest()
+        new_hash = md5((self._username + ':' + self._password + ':' + self._loginprovider).encode('utf-8')).hexdigest()
         if new_hash != old_hash:
             _LOGGER.debug('Credentials have changed, clearing tokens.')
             self._account.hash = new_hash
@@ -259,20 +269,85 @@ class Auth:
         # Start login flow
         util.http_get('https://account.streamz.be/login')
 
-        # Send login credentials
-        util.http_post('https://login.streamz.be/co/authenticate',
-                       data={
-                           "client_id": self.CLIENT_ID,
-                           "username": self._username,
-                           "password": self._password,
-                           "realm": "Username-Password-Authentication",
-                           "credential_type": "http://auth0.com/oauth/grant-type/password-realm"
-                       },
-                       headers={
-                           'Origin': 'https://account.streamz.be',
-                           'Referer': 'https://account.streamz.be',
-                       })
+        # Generate random state and nonce parameters
+        import random
+        import string
+        state = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(32))
+        nonce = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(32))
 
+        if self._loginprovider == LOGIN_STREAMZ:
+
+            # Send login credentials
+            response = util.http_post('https://login.streamz.be/co/authenticate',
+                                      data={
+                                          "client_id": self.CLIENT_ID,
+                                          "username": self._username,
+                                          "password": self._password,
+                                          "realm": "Username-Password-Authentication",
+                                          "credential_type": "http://auth0.com/oauth/grant-type/password-realm"
+                                      },
+                                      headers={
+                                          'Origin': 'https://account.streamz.be',
+                                          'Referer': 'https://account.streamz.be',
+                                      })
+            login_data = json.loads(response.text)
+
+            # Obtain authorization
+            response = util.http_get('https://login.streamz.be/authorize',
+                                     params={
+                                         'audience': 'https://streamz.eu.auth0.com/api/v2/',
+                                         'domain': 'login.streamz.be',
+                                         'client_id': self.CLIENT_ID,
+                                         'response_type': 'id_token token',
+                                         'redirect_uri': 'https://account.streamz.be/callback',
+                                         'scope': 'read:current_user profile email openid',
+                                         'state': state,
+                                         'nonce': nonce,
+                                         'auth0Client': 'eyJuYW1lIjoiYXV0aDAuanMiLCJ2ZXJzaW9uIjoiOS4xMy4yIn0=',
+                                         # base64 encoded {"name":"auth0.js","version":"9.13.2"}
+                                         'realm': 'Username-Password-Authentication',
+                                         'login_ticket': login_data.get('login_ticket'),
+                                     })
+
+        elif self._loginprovider == LOGIN_TELENET:
+
+            # Obtain authorization
+            util.http_get('https://login.streamz.be/authorize',
+                          params={
+                              'audience': 'https://streamz.eu.auth0.com/api/v2/',
+                              'domain': 'login.streamz.be',
+                              'client_id': self.CLIENT_ID,
+                              'response_type': 'id_token token',
+                              'redirect_uri': 'https://account.streamz.be/callback',
+                              'scope': 'read:current_user profile email openid',
+                              'connection': 'TN',
+                              'state': state,
+                              'nonce': nonce,
+                              'auth0Client': 'eyJuYW1lIjoiYXV0aDAuanMiLCJ2ZXJzaW9uIjoiOS4xMy4yIn0=',  # base64 encoded {"name":"auth0.js","version":"9.13.2"}
+                          })
+
+            # Send login credentials
+            response = util.http_post('https://login.prd.telenet.be/openid/login.do',
+                                      form={
+                                          'j_username': self._username,
+                                          'j_password': self._password,
+                                          'rememberme': 'true',
+                                      })
+
+        else:
+            raise Exception('Unsupported login method: %s' % self._loginprovider)
+
+        # Extract login_token
+        params = parse_qs(urlsplit(response.url).fragment)
+        if params:
+            self._account.login_token = params.get('access_token')[0]
+        else:
+            raise LoginErrorException(code=103)  # Could not extract parameter
+
+        # Check login token
+        self.check_status()
+
+        # Login to the actual app
         response = util.http_get('https://www.streamz.be/streamz/aanmelden')
 
         # Extract state and code
@@ -296,9 +371,25 @@ class Auth:
 
         # Get JWT from cookies
         self._account.jwt_token = util.SESSION.cookies.get('lfvp_auth')
+
         self._save_cache()
 
         return self._account
+
+    def check_status(self):
+        """ Check customer status """
+        response = util.http_get('https://customer-api.streamz.be/onboarding/customer-status',
+                                 headers={
+                                     'authorization': 'Bearer ' + self._account.login_token,
+                                 })
+
+        status = json.loads(response.text)
+
+        if status.get('customerStatus') == 'NOT_AUTHORIZED':
+            raise NoStreamzSubscriptionException()
+
+        if status.get('customerStatus') == 'NOT_AUTHORIZED_TELENET':
+            raise NoTelenetSubscriptionException()
 
     def _load_cache(self):
         """ Load tokens from cache """

@@ -87,6 +87,14 @@ msgstr "Ga naar programma"
 
 
 ### CODE
+msgctxt "#30201"
+msgid "Your Streamz account has no active subscription!"
+msgstr "Uw Streamz account heeft geen geldig abbonement!"
+
+msgctxt "#30202"
+msgid "Your Telenet account has no active subscription!"
+msgstr "Uw Telenet account heeft geen geldig abbonement!"
+
 msgctxt "#30203"
 msgid "Your credentials are not valid!"
 msgstr "De inloggegevens zijn onjuist!"
@@ -191,15 +199,27 @@ msgctxt "#30805"
 msgid "Password"
 msgstr "Wachtwoord"
 
+msgctxt "#30807"
+msgid "Login provider"
+msgstr "Loginaanbieder"
+
 msgctxt "#30809"
-msgid "Profile"
-msgstr "Profile"
+msgid "Streamz"
+msgstr "Streamz"
 
 msgctxt "#30810"
+msgid "Telenet"
+msgstr "Telenet"
+
+msgctxt "#30811"
+msgid "Profile"
+msgstr "Profiel"
+
+msgctxt "#30812"
 msgid "Always use the current profile"
 msgstr "Altijd het huidige profiel gebruiken"
 
-msgctxt "#30811"
+msgctxt "#30813"
 msgid "Current profile"
 msgstr "Huidig profiel"
 
