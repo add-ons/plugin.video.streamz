@@ -203,10 +203,10 @@ class ResolvedStream:
 
     def __init__(self, program=None, program_id=None, title=None, duration=None, url=None, license_url=None, subtitles=None, cookies=None):
         """
-        :type program: str|None
-        :type program_id: int|None
+        :type program: str
+        :type program_id: str
         :type title: str
-        :type duration: str|None
+        :type duration: str
         :type url: str
         :type license_url: str
         :type subtitles: list[str]

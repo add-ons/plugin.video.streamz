@@ -9,8 +9,8 @@ from resources.lib.kodiplayer import KodiPlayer
 from resources.lib import kodiutils
 from resources.lib.streamz.api import Api
 from resources.lib.streamz.auth import Auth
-from resources.lib.streamz.exceptions import UnavailableException
-from resources.lib.streamz.stream import StreamGeoblockedException, StreamUnavailableException, Stream
+from resources.lib.streamz.exceptions import UnavailableException, LimitReachedException, StreamGeoblockedException, StreamUnavailableException
+from resources.lib.streamz.stream import Stream
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -30,6 +30,7 @@ class Player:
 
     def play(self, category, item):
         """ Play the requested item.
+
         :type category: string
         :type item: string
         """
@@ -43,12 +44,17 @@ class Player:
             resolved_stream = self._stream.get_stream(category, item)
 
         except StreamGeoblockedException:
-            kodiutils.ok_dialog(heading=kodiutils.localize(30709), message=kodiutils.localize(30710))  # This video is geo-blocked...
+            kodiutils.ok_dialog(message=kodiutils.localize(30710))  # This video is geo-blocked...
             kodiutils.end_of_directory()
             return
 
         except StreamUnavailableException:
-            kodiutils.ok_dialog(heading=kodiutils.localize(30711), message=kodiutils.localize(30712))  # The video is unavailable...
+            kodiutils.ok_dialog(message=kodiutils.localize(30712))  # The video is unavailable...
+            kodiutils.end_of_directory()
+            return
+
+        except LimitReachedException:
+            kodiutils.ok_dialog(message=kodiutils.localize(30713))  # You have reached the maximum amount of concurrent streams...
             kodiutils.end_of_directory()
             return
 
@@ -101,16 +107,6 @@ class Player:
                         if next_episode_details:
                             upnext_data = self.generate_upnext(episode_details, next_episode_details)
 
-            elif category == 'channels':
-                info_dict.update({'mediatype': 'episode'})
-
-                # For live channels, we need to keep on updating the manifest
-                # This might not be needed, and could be done with the Location-tag updates if inputstream.adaptive supports it
-                # See https://github.com/peak3d/inputstream.adaptive/pull/298#issuecomment-524206935
-                prop_dict.update({
-                    'inputstream.adaptive.manifest_update_parameter': 'full',
-                })
-
             else:
                 _LOGGER.warning('Unknown category %s', category)
 
@@ -138,6 +134,7 @@ class Player:
     @staticmethod
     def _check_inputstream():
         """ Check if inputstreamhelper and inputstream.adaptive are fine.
+
         :rtype boolean
         """
         try:
@@ -156,6 +153,7 @@ class Player:
     @staticmethod
     def generate_upnext(current_episode, next_episode):
         """ Construct the data for Up Next.
+
         :type current_episode: resources.lib.streamz.api.Episode
         :type next_episode: resources.lib.streamz.api.Episode
         """
@@ -200,6 +198,7 @@ class Player:
     @staticmethod
     def send_upnext(upnext_info):
         """ Send a message to Up Next with information about the next Episode.
+
         :type upnext_info: object
         """
         from base64 import b64encode

@@ -6,6 +6,7 @@ from __future__ import absolute_import, division, unicode_literals
 import logging
 
 import routing
+from requests import HTTPError
 
 from resources.lib import kodilogging, kodiutils
 from resources.lib.streamz.exceptions import NoLoginException, InvalidLoginException, LoginErrorException, NoTelenetSubscriptionException, \
@@ -51,7 +52,10 @@ def index():
 
     except LoginErrorException as exc:
         kodiutils.ok_dialog(message=kodiutils.localize(30702, code=exc.code))  # Unknown error while logging in: {code}
-        kodiutils.open_settings()
+        kodiutils.end_of_directory()
+
+    except HTTPError as exc:
+        kodiutils.ok_dialog(message=kodiutils.localize(30702, code='HTTP %d' % exc.response.status_code))  # Unknown error while logging in: {code}
         kodiutils.end_of_directory()
 
 

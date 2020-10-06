@@ -34,11 +34,11 @@ class Api:
         self._tokens = self._auth.login()
 
     def _mode(self):
-        """ Return the mode that should be used for API calls """
+        """ Return the mode that should be used for API calls. """
         return 'streamz-kids' if self._tokens.product == 'STREAMZ_KIDS' else 'streamz'
 
     def get_config(self):
-        """ Returns the config for the app """
+        """ Returns the config for the app. """
         response = util.http_get(API_ENDPOINT + '/config', token=self._tokens.jwt_token)
         info = json.loads(response.text)
 
@@ -46,7 +46,11 @@ class Api:
         return info
 
     def get_recommendations(self, storefront):
-        """ Returns the config for the dashboard """
+        """ Returns the config for the dashboard.
+
+         :param str storefront:         The ID of the listing.
+         :rtype: list[Category]
+         """
         response = util.http_get(API_ENDPOINT + '/%s/storefronts/%s' % (self._mode(), storefront),
                                  token=self._tokens.jwt_token,
                                  profile=self._tokens.profile)
@@ -74,8 +78,11 @@ class Api:
 
         return categories
 
-    def get_swimlane(self, swimlane=None):
-        """ Returns the contents of My List """
+    def get_swimlane(self, swimlane):
+        """ Returns the contents of a swimlane (My List, Continue Watching).
+
+         :param str swimlane:           The name of the swimlane to fetch.
+         """
         response = util.http_get(API_ENDPOINT + '/%s/main/swimlane/%s' % (self._mode(), swimlane),
                                  token=self._tokens.jwt_token,
                                  profile=self._tokens.profile)
@@ -100,19 +107,20 @@ class Api:
         return items
 
     def add_mylist(self, video_type, content_id):
-        """ Add an item to My List """
+        """ Add an item to My List. """
         util.http_put(API_ENDPOINT + '/%s/userData/myList/%s/%s' % (self._mode(), video_type, content_id),
                       token=self._tokens.jwt_token,
                       profile=self._tokens.profile)
 
     def del_mylist(self, video_type, content_id):
-        """ Delete an item from My List """
+        """ Delete an item from My List. """
         util.http_delete(API_ENDPOINT + '/%s/userData/myList/%s/%s' % (self._mode(), video_type, content_id),
                          token=self._tokens.jwt_token,
                          profile=self._tokens.profile)
 
     def get_categories(self):
         """ Get a list of all the categories.
+
         :rtype list[Category]
         """
         response = util.http_get(API_ENDPOINT + '/%s/catalog/filters' % self._mode(),
@@ -131,6 +139,7 @@ class Api:
 
     def get_items(self, category=None):
         """ Get a list of all the items in a category.
+
         :type category: str
         :rtype list[Union[Movie, Program]]
         """
@@ -154,6 +163,7 @@ class Api:
 
     def get_movie(self, movie_id, cache=CACHE_AUTO):
         """ Get the details of the specified movie.
+
         :type movie_id: str
         :type cache: int
         :rtype Movie
@@ -192,6 +202,7 @@ class Api:
 
     def get_program(self, program_id, cache=CACHE_AUTO):
         """ Get the details of the specified program.
+
         :type program_id: str
         :type cache: int
         :rtype Program

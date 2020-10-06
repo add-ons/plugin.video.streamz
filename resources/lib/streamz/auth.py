@@ -10,7 +10,8 @@ import re
 from hashlib import md5
 
 from resources.lib.streamz import util, API_ENDPOINT, Profile
-from resources.lib.streamz.exceptions import LoginErrorException, NoLoginException, NoTelenetSubscriptionException, NoStreamzSubscriptionException
+from resources.lib.streamz.exceptions import LoginErrorException, NoLoginException, NoTelenetSubscriptionException, NoStreamzSubscriptionException, \
+    InvalidLoginException
 
 try:  # Python 3
     from urllib.parse import parse_qs, urlsplit
@@ -152,116 +153,6 @@ class Auth:
         self._account.jwt_token = None
         self._save_cache()
 
-    # def _app_login(self):
-    #     """ Executes a login and returns the JSON Web Token.
-    #     :rtype str
-    #     """
-    #     # TODO: randomize
-    #     nonce = 'CDvv9_Zer256fnt4KaD0ngfekutOSeSPZGg5VBQywyg'
-    #
-    #     # Start login flow, this will do a redirect to the login form
-    #     response = util.http_get('https://login.streamz.be/authorize', params={
-    #         'scope': 'openid',
-    #         'auth0Client': 'eyJuYW1lIjoiQXV0aDAuQW5kcm9pZCIsImVudiI6eyJhbmRyb2lkIjoiMjMifSwidmVyc2lvbiI6IjEuMjMuMCJ9',
-    #         'client_id': self.CLIENT_ID,
-    #         'code_challenge_method': 'S256',
-    #         'state': 'HWlWHpwwGkzIgFDwBk8VANFZq8b3ANIFY-SBg2FdmTY',  # TODO: random
-    #         'response_type': 'code',
-    #         'redirect_uri': 'streamz://login.streamz.be/android/be.dpgmedia.streamz/callback',
-    #         'code_challenge': 'rI9r3h5EWRT72Vkcyj2z9aumBKFZkoePkg01JIEw2Kw',  # TODO: random
-    #         'nonce': nonce,
-    #     })
-    #     response.raise_for_status()
-    #
-    #     # Extract configuration of login page
-    #     matches_config = re.search(r"var config = JSON\.parse\(decodeURIComponent\(escape\(window\.atob\('([^']+)'", response.text)
-    #     if not matches_config:
-    #         raise LoginErrorException(code=101)  # Could not extract authentication configuration
-    #
-    #     config_json = base64.decodebytes(matches_config.group(1).encode())
-    #     config = json.loads(config_json)
-    #
-    #     # Send credentials
-    #     response = util.http_post('https://login.streamz.be/usernamepassword/login', data={
-    #         "_csrf": config.get('extraParams', {}).get('_csrf'),
-    #         "_intstate": config.get('extraParams', {}).get('_intstate'),
-    #         "client_id": self.CLIENT_ID,
-    #         "connection": "Username-Password-Authentication",
-    #         "nonce": nonce,
-    #         "password": self._password,
-    #         "redirect_uri": "streamz://login.streamz.be/android/be.dpgmedia.streamz/callback",
-    #         "response_type": "code",
-    #         "scope": "openid",
-    #         "state": config.get('extraParams', {}).get('state'),
-    #         "tenant": "streamz",
-    #         "username": self._username,
-    #     }, headers={
-    #         'Referrer': response.url,
-    #         'Origin': 'https://login.streamz.be',
-    #     })
-    #
-    #     # Extract fields
-    #     matches_action = re.search(r'action="([^"]+)', response.text)
-    #     if not matches_action:
-    #         raise LoginErrorException(code=102)  # Could not extract parameter
-    #
-    #     matches_wa = re.search(r'name="wa"\s+value="([^"]+)', response.text)
-    #     if not matches_wa:
-    #         raise LoginErrorException(code=103)  # Could not extract parameter
-    #
-    #     matches_wresult = re.search(r'name="wresult"\s+value="([^"]+)', response.text)
-    #     if not matches_wresult:
-    #         raise LoginErrorException(code=104)  # Could not extract parameter
-    #
-    #     matches_wctx = re.search(r'name="wctx"\s+value="([^"]+)', response.text)
-    #     if not matches_wctx:
-    #         raise LoginErrorException(code=105)  # Could not extract parameter
-    #
-    #     # We now need to POST this form to get a code and state.
-    #     try:
-    #         response = util.http_post(matches_action.group(1), form={
-    #             'wa': unescape(matches_wa.group(1)),
-    #             'wresult': unescape(matches_wresult.group(1)),
-    #             'wctx': unescape(matches_wctx.group(1)),
-    #         }, headers={
-    #             'Referrer': response.url,
-    #             'Origin': 'https://login.streamz.be',
-    #         })
-    #         response.raise_for_status()
-    #     except requests.exceptions.InvalidSchema as exc:
-    #
-    #         # I found no other way to get this url then by parsing the Exception message. :(
-    #         matches_code = re.search(r"code=([^&]+)", str(exc))
-    #         if not matches_code:
-    #             raise LoginErrorException(code=106)  # Could not extract authentication code
-    #         code = matches_code.group(1)
-    #
-    #         if not code:
-    #             raise LoginErrorException(code=107)  # Could not extract authentication code
-    #
-    #         # matches_state = re.search(r"state=([^&]+)", str(exc))
-    #         # if not matches_state:
-    #         #     raise LoginErrorException(code=107)  # Could not extract authentication code
-    #         # state = matches_state.group(1)
-    #
-    #         _LOGGER.debug(code)
-    #
-    #     # To get a JWT, we need to use our code and state
-    #     response = util.http_post(matches_action.group(1), data={
-    #         "client_id": self.CLIENT_ID,
-    #         "redirect_uri": "streamz://login.streamz.be/android/be.dpgmedia.streamz/callback",
-    #         "code_verifier": "FuAw_qyJMrLr-Mb8eHOo4EIu_dxmavR1xpLZn7KWZ1Y",  # TODO: how do we get this?
-    #         "code": code,
-    #         "grant_type": "authorization_code"
-    #     }, headers={
-    #         'Referrer': response.url,
-    #         'Origin': 'https://login.streamz.be',
-    #     })
-    #     response.raise_for_status()
-    #
-    #     _LOGGER.debug(response.text)
-    #     _LOGGER.debug(response.url)
-
     def _web_login(self):
         """ Executes a login and returns the JSON Web Token.
         :rtype str
@@ -333,6 +224,9 @@ class Auth:
                                           'j_password': self._password,
                                           'rememberme': 'true',
                                       })
+
+            if 'Je gebruikersnaam en/of wachtwoord zijn verkeerd' in response.text:
+                raise InvalidLoginException
 
         else:
             raise Exception('Unsupported login method: %s' % self._loginprovider)

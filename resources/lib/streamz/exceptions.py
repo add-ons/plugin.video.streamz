@@ -17,11 +17,11 @@ class InvalidLoginException(Exception):
 
 
 class NoStreamzSubscriptionException(Exception):
-    """ Is thrown when you don't have an subscription. """
+    """ Is thrown when you don't have an subscription with Streamz. """
 
 
 class NoTelenetSubscriptionException(Exception):
-    """ Is thrown when you don't have an subscription. """
+    """ Is thrown when you don't have an subscription with Telenet. """
 
 
 class LoginErrorException(Exception):
@@ -42,3 +42,7 @@ class StreamGeoblockedException(Exception):
 
 class StreamUnavailableException(Exception):
     """ Is thrown when an unavailable item is played. """
+
+
+class LimitReachedException(Exception):
+    """ Is thrown when the limit is reached to play an stream. """
