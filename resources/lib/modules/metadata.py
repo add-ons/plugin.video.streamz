@@ -26,12 +26,12 @@ class Metadata:
         self._api = Api(self._auth)
 
     def update(self):
-        """ Update the metadata with a foreground progress indicator """
+        """ Update the metadata with a foreground progress indicator. """
         # Create progress indicator
         progress = kodiutils.progress(message=kodiutils.localize(30715))  # Updating metadata
 
         def update_status(i, total):
-            """ Update the progress indicator """
+            """ Update the progress indicator. """
             progress.update(int(((i + 1) / total) * 100), kodiutils.localize(30716, index=i + 1, total=total))  # Updating metadata ({index}/{total})
             return progress.iscanceled()
 
@@ -41,7 +41,8 @@ class Metadata:
         progress.close()
 
     def fetch_metadata(self, callback=None):
-        """ Fetch the metadata for all the items in the catalog
+        """ Fetch the metadata for all the items in the catalog.
+
         :type callback: callable
         """
         # Fetch all items from the catalog
@@ -64,7 +65,7 @@ class Metadata:
 
     @staticmethod
     def clean():
-        """ Clear metadata (called from settings) """
+        """ Clear metadata (called from settings). """
         kodiutils.invalidate_cache()
         kodiutils.set_setting('metadata_last_updated', '0')
         kodiutils.ok_dialog(message=kodiutils.localize(30714))  # Local metadata is cleared

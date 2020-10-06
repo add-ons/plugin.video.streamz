@@ -26,7 +26,8 @@ class Authentication:
         self._api = Api(self._auth)
 
     def select_profile(self, key=None):
-        """ Show your profiles
+        """ Show your profiles.
+
         :type key: str
         """
         profiles = self._auth.get_profiles()
@@ -71,7 +72,8 @@ class Authentication:
 
     @staticmethod
     def _get_profile_name(profile):
-        """ Get a descriptive string of the profile
+        """ Get a descriptive string of the profile.
+
         :type profile: resources.lib.streamz.Profile
         """
         title = profile.name

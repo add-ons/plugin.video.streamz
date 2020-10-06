@@ -11,6 +11,7 @@ import unittest
 import xbmc
 
 from resources.lib import kodiutils
+from resources.lib.streamz import Movie
 from resources.lib.streamz.api import Api
 from resources.lib.streamz.auth import Auth
 from resources.lib.streamz.stream import Stream, ResolvedStream
@@ -35,7 +36,12 @@ class TestStream(unittest.TestCase):
         xbmc.Player().stop()
 
     def test_stream(self):
-        stream = self.stream.get_stream('movies', 'dc980ef6-b9f6-4d99-bbf2-5dfa2f9b7867')
+        # Find the first movie from the catalog
+        items = self.api.get_items()
+        movie = next(item for item in items if isinstance(item, Movie))
+        _LOGGER.info('Playing %s', movie)
+
+        stream = self.stream.get_stream('movies', movie.movie_id)
         self.assertIsInstance(stream, ResolvedStream)
 
 

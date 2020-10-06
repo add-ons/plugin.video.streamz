@@ -27,7 +27,7 @@ class Menu:
         self._api = Api(self._auth)
 
     def show_mainmenu(self):
-        """ Show the main menu """
+        """ Show the main menu. """
         listing = []
 
         if self._auth.login().product == 'STREAMZ':
@@ -147,7 +147,8 @@ class Menu:
 
     @staticmethod
     def format_plot(obj):
-        """ Format the plot for a item
+        """ Format the plot for a item.
+
         :type obj: object
         :rtype str
         """
@@ -183,6 +184,7 @@ class Menu:
     @classmethod
     def generate_titleitem(cls, item, progress=False):
         """ Generate a TitleItem based on a Movie, Program or Episode.
+
         :type item: Union[Movie, Program, Episode]
         :type progress: bool
         :rtype TitleItem

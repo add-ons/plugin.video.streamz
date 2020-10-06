@@ -147,28 +147,24 @@ msgid "Unknown error while logging in: {code}"
 msgstr "Onbekende fout bij het inloggen: {code}"
 
 msgctxt "#30703"
-msgid "Your account has no profiles defined. Please login on www.streamz.be/streamz and create a profile."
-msgstr "Uw account heeft geen profielen. Gelieve in te loggen op www.streamz.be/streamz en een profiel aan te maken."
+msgid "Your account has no profiles defined. Please login on www.streamz.be and create a profile."
+msgstr "Uw account heeft geen profielen. Gelieve in te loggen op www.streamz.be en een profiel aan te maken."
 
 msgctxt "#30708"
 msgid "Please restart Kodi."
 msgstr "Gelieve Kodi te herstarten."
 
-msgctxt "#30709"
-msgid "Geo-blocked video"
-msgstr "Video is geografisch geblokkeerd"
-
 msgctxt "#30710"
 msgid "This video is geo-blocked and can't be played from your location."
 msgstr "Deze video is geografisch geblokkeerd en kan niet worden afgespeeld vanaf uw locatie."
 
-msgctxt "#30711"
-msgid "Unavailable video"
-msgstr "Onbeschikbare video"
-
 msgctxt "#30712"
 msgid "The video is unavailable and can't be played right now."
 msgstr "Deze video is niet beschikbaar en kan nu niet worden afgespeeld."
+
+msgctxt "#30713"
+msgid "You have reached the maximum amount of concurrent streams. Please stop streaming on another device to start watching here."
+msgstr "U heeft het maximum aantal gelijktijdige streams bereikt. Gelieve te stoppen met streamen op een ander apparaat om hier te beginnen kijken."
 
 msgctxt "#30714"
 msgid "Local metadata is cleared."

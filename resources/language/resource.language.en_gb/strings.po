@@ -146,27 +146,23 @@ msgid "Unknown error while logging in: {code}"
 msgstr ""
 
 msgctxt "#30703"
-msgid "Your account has no profiles defined. Please login on www.streamz.be/streamz and create a profile."
+msgid "Your account has no profiles defined. Please login on www.streamz.be and create a profile."
 msgstr ""
 
 msgctxt "#30708"
 msgid "Please restart Kodi."
 msgstr ""
 
-msgctxt "#30709"
-msgid "Geo-blocked video"
-msgstr ""
-
 msgctxt "#30710"
 msgid "This video is geo-blocked and can't be played from your location."
 msgstr ""
 
-msgctxt "#30711"
-msgid "Unavailable video"
-msgstr ""
-
 msgctxt "#30712"
 msgid "The video is unavailable and can't be played right now."
+msgstr ""
+
+msgctxt "#30713"
+msgid "You have reached the maximum amount of concurrent streams. Please stop streaming on another device to start watching here."
 msgstr ""
 
 msgctxt "#30714"

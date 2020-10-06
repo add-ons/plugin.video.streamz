@@ -28,7 +28,7 @@ class Catalog:
         self._api = Api(self._auth)
 
     def show_catalog(self):
-        """ Show the catalog """
+        """ Show the catalog. """
         categories = self._api.get_categories()
 
         listing = []
@@ -45,7 +45,8 @@ class Catalog:
         kodiutils.show_listing(listing, 30003, content='files')
 
     def show_catalog_category(self, category=None):
-        """ Show a category in the catalog
+        """ Show a category in the catalog.
+
         :type category: str
         """
         items = self._api.get_items(category)
@@ -59,7 +60,8 @@ class Catalog:
         kodiutils.show_listing(listing, 30003, content='movies' if category == 'films' else 'tvshows', sort=['label', 'year', 'duration'])
 
     def show_program(self, program):
-        """ Show a program from the catalog
+        """ Show a program from the catalog.
+
         :type program: str
          """
         try:
@@ -120,7 +122,8 @@ class Catalog:
         kodiutils.show_listing(listing, 30003, content='tvshows', sort=['label'])
 
     def show_program_season(self, program, season):
-        """ Show the episodes of a program from the catalog
+        """ Show the episodes of a program from the catalog.
+
         :type program: str
         :type season: int
         """
@@ -144,7 +147,8 @@ class Catalog:
         kodiutils.show_listing(listing, 30003, content='episodes', sort=['episode', 'duration'])
 
     def show_recommendations(self, storefront):
-        """ Show the recommendations
+        """ Show the recommendations.
+
         :type storefront: str
         """
         recommendations = self._api.get_recommendations(storefront)
@@ -163,7 +167,8 @@ class Catalog:
         kodiutils.show_listing(listing, 30015, content='files')
 
     def show_recommendations_category(self, storefront, category):
-        """ Show the items in a recommendations category
+        """ Show the items in a recommendations category.
+
         :type storefront: str
         :type category: str
         """
@@ -182,7 +187,7 @@ class Catalog:
         kodiutils.show_listing(listing, 30015, content='tvshows')
 
     def show_mylist(self):
-        """ Show the items in "My List" """
+        """ Show the items in "My List". """
         mylist = self._api.get_swimlane('my-list')
 
         listing = []
@@ -194,7 +199,8 @@ class Catalog:
         kodiutils.show_listing(listing, 30017, content='tvshows')
 
     def mylist_add(self, video_type, content_id):
-        """ Add an item to "My List"
+        """ Add an item to "My List".
+
         :type video_type: str
         :type content_id: str
          """
@@ -202,7 +208,8 @@ class Catalog:
         kodiutils.end_of_directory()
 
     def mylist_del(self, video_type, content_id):
-        """ Remove an item from "My List"
+        """ Remove an item from "My List".
+
         :type video_type: str
         :type content_id: str
         """
@@ -211,7 +218,7 @@ class Catalog:
         kodiutils.container_refresh()
 
     def show_continuewatching(self):
-        """ Show the items in "Continue Watching" """
+        """ Show the items in "Continue Watching". """
         mylist = self._api.get_swimlane('continue-watching')
 
         listing = []

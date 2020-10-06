@@ -11,6 +11,7 @@ from resources.lib import kodiutils
 from resources.lib.streamz import STOREFRONT_MAIN, STOREFRONT_MOVIES, STOREFRONT_SERIES
 from resources.lib.streamz.api import Api
 from resources.lib.streamz.auth import Auth
+from resources.lib.streamz.exceptions import UnavailableException
 
 
 @unittest.skipUnless(kodiutils.get_setting('username') and kodiutils.get_setting('password'), 'Skipping since we have no credentials.')
@@ -54,6 +55,19 @@ class TestApi(unittest.TestCase):
     def test_search(self):
         results = self.api.do_search('huis')
         self.assertIsInstance(results, list)
+
+    def test_errors(self):
+        with self.assertRaises(UnavailableException):
+            self.api.get_movie('0')
+
+        with self.assertRaises(UnavailableException):
+            self.api.get_program('0')
+
+        with self.assertRaises(UnavailableException):
+            self.api.get_episode('0')
+
+        with self.assertRaises(UnavailableException):
+            self.api.get_items('movies')
 
 
 if __name__ == '__main__':
