@@ -22,7 +22,7 @@
         <description lang="nl_NL">Streamz is een video-on-demand platform dat toegang biedt tot Vlaamse series en films van DPG Media, Telenet en VRT, maar ook films en series van 'Home of HBO' en de laatste blockbuster films.</description>
         <disclaimer lang="nl_NL">Deze add-on wordt niet ondersteund door Streamz BV, en wordt aangeboden 'as is', zonder enige garantie. De Streamz naam en Streamz logo zijn eigendom van Streamz BV en worden gebruikt in overeenstemming met de 'fair use' regels.</disclaimer>
         <platform>all</platform>
-        <license>GPL-3.0</license>
+        <license>GPL-3.0-only</license>
         <news>v0.0.1 (2020-09-21)
 - Initial release</news>
         <source>https://github.com/add-ons/plugin.video.streamz</source>
