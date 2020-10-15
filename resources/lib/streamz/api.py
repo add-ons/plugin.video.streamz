@@ -114,6 +114,11 @@ class Api:
             response = util.http_get(API_ENDPOINT + '/%s/main/swimlane/%s' % (self._mode(), swimlane),
                                      token=self._tokens.jwt_token,
                                      profile=self._tokens.profile)
+
+            # Result can be empty
+            if not response.text:
+                return []
+
             result = json.loads(response.text)
 
             kodiutils.set_cache(['swimlane', swimlane], result)
