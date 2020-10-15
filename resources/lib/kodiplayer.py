@@ -20,7 +20,7 @@ class KodiPlayer(xbmc.Player):
 
         self.__monitor = xbmc.Monitor()
         self.__playBackEventsTriggered = False  # pylint: disable=invalid-name
-        self.__playPlayBackEndedEventsTriggered = False  # pylint: disable=invalid-name
+        self.__playPlayBackStoppedEventsTriggered = False  # pylint: disable=invalid-name
         self.__pollInterval = 1  # pylint: disable=invalid-name
 
     def waitForPlayBack(self, url=None, time_out=30):  # pylint: disable=invalid-name
@@ -44,8 +44,8 @@ class KodiPlayer(xbmc.Player):
                 _LOGGER.debug("Player: PlayBack started (%s)" % i * self.__pollInterval)
                 return True
 
-            if self.__playPlayBackEndedEventsTriggered:
-                _LOGGER.warning("Player: PlayBackEnded triggered while waiting for start.")
+            if self.__playPlayBackStoppedEventsTriggered:
+                _LOGGER.warning("Player: PlayBackStopped triggered while waiting for start.")
                 return False
 
             self.__monitor.waitForAbort(self.__pollInterval)
@@ -58,11 +58,6 @@ class KodiPlayer(xbmc.Player):
         """ Will be called when Kodi has a video or audiostream """
         _LOGGER.debug("Player: [onAVStarted] called")
         self.__playback_started()
-
-    def onPlayBackEnded(self):  # pylint: disable=invalid-name
-        """ Will be called when [Kodi] stops playing a file """
-        _LOGGER.debug("Player: [onPlayBackEnded] called")
-        self.__playback_stopped()
 
     def onPlayBackStopped(self):  # pylint: disable=invalid-name
         """ Will be called when [user] stops Kodi playing a file """
@@ -77,12 +72,12 @@ class KodiPlayer(xbmc.Player):
     def __playback_stopped(self):
         """ Sets the correct flags after playback stopped """
         self.__playBackEventsTriggered = False
-        self.__playPlayBackEndedEventsTriggered = True
+        self.__playPlayBackStoppedEventsTriggered = True
 
     def __playback_started(self):
         """ Sets the correct flags after playback started """
         self.__playBackEventsTriggered = True
-        self.__playPlayBackEndedEventsTriggered = False
+        self.__playPlayBackStoppedEventsTriggered = False
 
     def __is_url_playing(self, url):
         """ Checks whether the given url is playing
