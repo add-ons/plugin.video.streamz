@@ -8,7 +8,7 @@ import logging
 from resources.lib import kodiutils
 from resources.lib.modules.menu import Menu
 from resources.lib.streamz import Movie, Program
-from resources.lib.streamz.api import Api, CACHE_PREVENT, CACHE_AUTO
+from resources.lib.streamz.api import Api, CACHE_PREVENT, CACHE_AUTO, CONTENT_TYPE_MOVIE, CONTENT_TYPE_PROGRAM
 from resources.lib.streamz.auth import Auth
 from resources.lib.streamz.exceptions import UnavailableException
 
@@ -30,20 +30,23 @@ class Library:
                           kodiutils.get_tokens_path())
         self._api = Api(self._auth)
 
-    def show_library_movies(self):
+    def show_library_movies(self, movie=None):
         """ Return a list of the movies that should be exported. """
-        if kodiutils.get_setting_int('library_movies') == LIBRARY_FULL_CATALOG:
-            # Full catalog
-            # Use cache if available, fetch from api otherwise so we get rich metadata for new content
-            items = self._api.get_items(content_filter=Movie, cache=CACHE_AUTO)
+        if movie is None:
+            if kodiutils.get_setting_int('library_movies') == LIBRARY_FULL_CATALOG:
+                # Full catalog
+                # Use cache if available, fetch from api otherwise so we get rich metadata for new content
+                items = self._api.get_items(content_filter=Movie, cache=CACHE_AUTO)
 
-            # Remove old caches
-            # When Kodi does a clean of the library, we validate a movie by its presence in the cache, so we need to make sure that
-            # items that aren't available anymore are also removed from the cache
-            kodiutils.cleanup_cache('movie', [item.movie_id for item in items])
+                # Remove old caches
+                # When Kodi does a clean of the library, we validate a movie by its presence in the cache, so we need to make sure that
+                # items that aren't available anymore are also removed from the cache
+                kodiutils.cleanup_cache('movie', [item.movie_id for item in items])
+            else:
+                # Only favourites, use cache if available, fetch from api otherwise
+                items = self._api.get_swimlane('my-list', content_filter=Movie)
         else:
-            # Only favourites, use cache if available, fetch from api otherwise
-            items = self._api.get_swimlane('my-list', content_filter=Movie)
+            items = [self._api.get_movie(movie)]
 
         listing = []
         for item in items:
@@ -54,23 +57,27 @@ class Library:
 
         kodiutils.show_listing(listing, 30003, content='movies', sort=['label', 'year', 'duration'])
 
-    def show_library_tvshows(self):
+    def show_library_tvshows(self, program=None):
         """ Return a list of the series that should be exported. """
-        if kodiutils.get_setting_int('library_tvshows') == LIBRARY_FULL_CATALOG:
-            # Full catalog
-            # Use cache if available, fetch from api otherwise so we get rich metadata for new content
-            # NOTE: We should probably use CACHE_PREVENT here, so we can pick up new episodes, but we can't since that would
-            #       require a massive amount of API calls for each update. We do this only for programs in 'My list'.
-            items = self._api.get_items(content_filter=Program, cache=CACHE_AUTO)
+        if program is None:
+            if kodiutils.get_setting_int('library_tvshows') == LIBRARY_FULL_CATALOG:
+                # Full catalog
+                # Use cache if available, fetch from api otherwise so we get rich metadata for new content
+                # NOTE: We should probably use CACHE_PREVENT here, so we can pick up new episodes, but we can't since that would
+                #       require a massive amount of API calls for each update. We do this only for programs in 'My list'.
+                items = self._api.get_items(content_filter=Program, cache=CACHE_AUTO)
 
-            # Remove old caches
-            # When Kodi does a clean of the library, we validate a tvshow by its presence in the cache, so we need to make sure that
-            # items that aren't available anymore are also removed from the cache
-            kodiutils.cleanup_cache('program', [item.program_id for item in items])
+                # Remove old caches
+                # When Kodi does a clean of the library, we validate a tvshow by its presence in the cache, so we need to make sure that
+                # items that aren't available anymore are also removed from the cache
+                kodiutils.cleanup_cache('program', [item.program_id for item in items])
+            else:
+                # Only favourites, don't use cache, fetch from api
+                # If we use CACHE_AUTO, we will miss updates until the user manually opens the program in the Add-on
+                items = self._api.get_swimlane('my-list', content_filter=Program, cache=CACHE_PREVENT)
         else:
-            # Only favourites, don't use cache, fetch from api
-            # If we use CACHE_AUTO, we will miss updates until the user manually opens the program in the Add-on
-            items = self._api.get_swimlane('my-list', content_filter=Program, cache=CACHE_PREVENT)
+            # Fetch only a single program
+            items = [self._api.get_program(program, cache=CACHE_PREVENT)]
 
         listing = []
         for item in items:
@@ -107,7 +114,6 @@ class Library:
             return
 
         if kodiutils.get_setting_int('library_movies') == LIBRARY_FULL_CATALOG:
-            # Full library
             try:
                 result = self._api.get_movie(movie)
             except UnavailableException:
@@ -115,7 +121,6 @@ class Library:
             kodiutils.library_return_status(result is not None)
 
         else:
-            # Only favourites
             mylist_ids = self._api.get_swimlane_ids('my-list')
             kodiutils.library_return_status(movie in mylist_ids)
 
@@ -129,7 +134,6 @@ class Library:
             return
 
         if kodiutils.get_setting_int('library_tvshows') == LIBRARY_FULL_CATALOG:
-            # Full catalog
             try:
                 result = self._api.get_program(program, cache=CACHE_PREVENT)
             except UnavailableException:
@@ -137,9 +141,36 @@ class Library:
             kodiutils.library_return_status(result is not None)
 
         else:
-            # Only favourites
             mylist_ids = self._api.get_swimlane_ids('my-list')
             kodiutils.library_return_status(program in mylist_ids)
+
+    @staticmethod
+    def mylist_added(video_type, content_id):
+        """ Something has been added to My List. We want to index this. """
+        if video_type == CONTENT_TYPE_MOVIE:
+            if kodiutils.get_setting_int('library_movies') != LIBRARY_ONLY_MYLIST:
+                return
+            # This unfortunately adds the movie to the database with the wrong parent path:
+            # Library().update('plugin://plugin.video.streamz/library/movies/?movie=%s&kodi_action=refresh_info' % content_id)
+            Library().update('plugin://plugin.video.streamz/library/movies/')
+
+        elif video_type == CONTENT_TYPE_PROGRAM:
+            if kodiutils.get_setting_int('library_tvshows') != LIBRARY_ONLY_MYLIST:
+                return
+            Library().update('plugin://plugin.video.streamz/library/tvshows/?program=%s&kodi_action=refresh_info' % content_id)
+
+    @staticmethod
+    def mylist_removed(video_type, content_id):
+        """ Something has been removed from My List. We want to de-index this. """
+        if video_type == CONTENT_TYPE_MOVIE:
+            if kodiutils.get_setting_int('library_movies') != LIBRARY_ONLY_MYLIST:
+                return
+            Library().clean('plugin://plugin.video.streamz/library/movies/?movie=%s' % content_id)
+
+        elif video_type == CONTENT_TYPE_PROGRAM:
+            if kodiutils.get_setting_int('library_tvshows') != LIBRARY_ONLY_MYLIST:
+                return
+            Library().clean('plugin://plugin.video.streamz/library/tvshows/?program=%s' % content_id)
 
     @staticmethod
     def configure():
@@ -151,11 +182,33 @@ class Library:
         kodiutils.execute_builtin('ActivateWindow(Videos,sources://video/)')
 
     @staticmethod
-    def update():
+    def update(path=None):
         """ Update the library integration. """
-        kodiutils.jsonrpc(method='VideoLibrary.Scan')
+        _LOGGER.debug('Scanning %s', path)
+        if path:
+            # We can use this to instantly add something to the library when we've added it to 'My List'.
+            kodiutils.jsonrpc(method='VideoLibrary.Scan', params=dict(
+                directory=path,
+                showdialogs=False,
+            ))
+        else:
+            kodiutils.jsonrpc(method='VideoLibrary.Scan')
 
     @staticmethod
-    def clean():
+    def clean(path=None):
         """ Cleanup the library integration. """
-        kodiutils.jsonrpc(method='VideoLibrary.Clean')
+        _LOGGER.debug('Cleaning %s', path)
+        if path:
+            # We can use this to instantly remove something from the library when we've removed it from 'My List'.
+            # This only works from Kodi 19 however. See https://github.com/xbmc/xbmc/pull/18562
+            if kodiutils.kodi_version_major() > 18:
+                kodiutils.jsonrpc(method='VideoLibrary.Clean', params=dict(
+                    directory=path,
+                    showdialogs=False,
+                ))
+            else:
+                kodiutils.jsonrpc(method='VideoLibrary.Clean', params=dict(
+                    showdialogs=False,
+                ))
+        else:
+            kodiutils.jsonrpc(method='VideoLibrary.Clean')

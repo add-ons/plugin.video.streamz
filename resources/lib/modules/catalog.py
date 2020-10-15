@@ -215,7 +215,6 @@ class Catalog:
         """
         self._api.del_mylist(video_type, content_id)
         kodiutils.end_of_directory()
-        kodiutils.container_refresh()
 
     def show_continuewatching(self):
         """ Show the items in "Continue Watching". """

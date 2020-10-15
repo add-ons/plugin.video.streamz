@@ -94,6 +94,10 @@ def library_movies():
         Library().check_library_movie(movie)
         return
 
+    if 'refresh_info' in routing.args.get('kodi_action', []):
+        Library().show_library_movies(movie)
+        return
+
     if movie:
         play('movies', movie)
     else:
@@ -111,6 +115,10 @@ def library_tvshows():
 
     if 'check_exists' in routing.args.get('kodi_action', []):
         Library().check_library_tvshow(program)
+        return
+
+    if 'refresh_info' in routing.args.get('kodi_action', []):
+        Library().show_library_tvshows(program)
         return
 
     if episode:
@@ -169,12 +177,18 @@ def mylist_add(video_type, content_id):
     from resources.lib.modules.catalog import Catalog
     Catalog().mylist_add(video_type, content_id)
 
+    from resources.lib.modules.library import Library
+    Library().mylist_added(video_type, content_id)
+
 
 @routing.route('/catalog/mylist/del/<video_type>/<content_id>')
 def mylist_del(video_type, content_id):
     """ Remove an item from "My List" """
     from resources.lib.modules.catalog import Catalog
     Catalog().mylist_del(video_type, content_id)
+
+    from resources.lib.modules.library import Library
+    Library().mylist_removed(video_type, content_id)
 
 
 @routing.route('/catalog/continuewatching')
