@@ -62,6 +62,14 @@ msgctxt "#30020"
 msgid "Continue watching where you left off"
 msgstr ""
 
+msgctxt "#30021"
+msgid "Kids"
+msgstr ""
+
+msgctxt "#30022"
+msgid "Show the VTM GO recommendations for Kids"
+msgstr ""
+
 
 ### SUBMENUS
 
@@ -138,7 +146,7 @@ msgstr ""
 ### MESSAGES
 
 msgctxt "#30701"
-msgid "You need to configure your credentials before you can access the content of Streamz."
+msgid "You need to configure your credentials before you can access the content of Streamz. Do you want to enter them now?"
 msgstr ""
 
 msgctxt "#30702"

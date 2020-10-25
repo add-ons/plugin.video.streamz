@@ -7,7 +7,7 @@ import json
 import logging
 
 from resources.lib import kodiutils
-from resources.lib.streamz import Category, Movie, Episode, Season, Program, util, API_ENDPOINT
+from resources.lib.streamz import API_ENDPOINT, Category, Episode, Movie, Program, Season, util
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -346,7 +346,8 @@ class Api:
         :type search: str
         :rtype list[Union[Movie, Program]]
         """
-        response = util.http_get(API_ENDPOINT + '/%s/search/?query=%s' % (self._mode(), quote(search)),
+        response = util.http_get(API_ENDPOINT + '/%s/search/?query=%s' % (self._mode(),
+                                                                          kodiutils.to_unicode(quote(kodiutils.from_unicode(search)))),
                                  token=self._tokens.jwt_token,
                                  profile=self._tokens.profile)
         results = json.loads(response.text)
@@ -430,5 +431,6 @@ class Api:
             return None
 
         import os.path
+
         # The channels id's we use in resources.lib.modules.CHANNELS neatly matches this part in the url.
         return str(os.path.basename(url).split('-')[0])

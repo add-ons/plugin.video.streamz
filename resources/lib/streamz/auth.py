@@ -9,9 +9,9 @@ import os
 import re
 from hashlib import md5
 
-from resources.lib.streamz import util, API_ENDPOINT, Profile
-from resources.lib.streamz.exceptions import LoginErrorException, NoLoginException, NoTelenetSubscriptionException, NoStreamzSubscriptionException, \
-    InvalidLoginException
+from resources.lib.streamz import API_ENDPOINT, Profile, util
+from resources.lib.streamz.exceptions import (InvalidLoginException, LoginErrorException, NoLoginException, NoStreamzSubscriptionException,
+                                              NoTelenetSubscriptionException)
 
 try:  # Python 3
     from urllib.parse import parse_qs, urlsplit

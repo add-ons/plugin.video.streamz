@@ -8,7 +8,7 @@ import logging
 import requests
 from requests import HTTPError
 
-from resources.lib.streamz.exceptions import InvalidTokenException, InvalidLoginException, UnavailableException, LimitReachedException
+from resources.lib.streamz.exceptions import InvalidLoginException, InvalidTokenException, LimitReachedException, UnavailableException
 
 _LOGGER = logging.getLogger(__name__)
 

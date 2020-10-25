@@ -4,8 +4,8 @@
 from __future__ import absolute_import, division, unicode_literals
 
 import logging
-import xbmc
 
+import xbmc
 
 _LOGGER = logging.getLogger(__name__)
 
