@@ -9,6 +9,7 @@ from time import time
 from xbmc import Monitor
 
 from resources.lib import kodilogging, kodiutils
+from resources.lib.streamz.exceptions import NoLoginException
 
 kodilogging.config()
 _LOGGER = logging.getLogger(__name__)
@@ -48,7 +49,11 @@ class BackgroundService(Monitor):
             """ Allow to cancel the background job """
             return self.abortRequested() or not kodiutils.get_setting_bool('metadata_update')
 
-        success = Metadata().fetch_metadata(callback=update_status)
+        try:
+            success = Metadata().fetch_metadata(callback=update_status)
+        except NoLoginException:
+            # We have no login yet, but that's okay, we will retry later
+            success = True
 
         # Update metadata_last_updated
         if success:

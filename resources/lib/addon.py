@@ -9,8 +9,7 @@ import routing
 from requests import HTTPError
 
 from resources.lib import kodilogging, kodiutils
-from resources.lib.streamz.exceptions import NoLoginException, InvalidLoginException, LoginErrorException, NoTelenetSubscriptionException, \
-    NoStreamzSubscriptionException
+from resources.lib.streamz.exceptions import InvalidLoginException, LoginErrorException, NoStreamzSubscriptionException, NoTelenetSubscriptionException
 
 kodilogging.config()
 routing = routing.Plugin()  # pylint: disable=invalid-name
@@ -20,22 +19,25 @@ _LOGGER = logging.getLogger(__name__)
 @routing.route('/')
 def index():
     """ Show the profile selection, or go to the main menu. """
+    while True:
+        if not kodiutils.get_setting('username') or not kodiutils.get_setting('password'):
+            if not kodiutils.yesno_dialog(message=kodiutils.localize(30701)):  # You need to configure your credentials...
+                # We have no credentials
+                kodiutils.end_of_directory()
+                kodiutils.execute_builtin('ActivateWindow(Home)')
+                return
+
+            kodiutils.open_settings()
+        else:
+            break
     try:
-        if (kodiutils.get_setting_bool('auto_login')
-                and kodiutils.get_setting('username')
-                and kodiutils.get_setting('password')
-                and kodiutils.get_setting('profile')):
+        if kodiutils.get_setting_bool('auto_login') and kodiutils.get_setting('profile'):
             # We have credentials
             show_main_menu()
 
         else:
             # Ask the user for the profile to use
             select_profile()
-
-    except NoLoginException:
-        kodiutils.ok_dialog(message=kodiutils.localize(30701))  # You need to configure your credentials...
-        kodiutils.open_settings()
-        kodiutils.container_refresh()
 
     except InvalidLoginException:
         kodiutils.ok_dialog(message=kodiutils.localize(30203))  # Your credentials are not valid!
@@ -111,7 +113,7 @@ def show_catalog_program_season(program, season):
 
 @routing.route('/catalog/recommendations/<storefront>')
 def show_recommendations(storefront):
-    """ Shows the programs of a specific date in the tv guide """
+    """ Shows the recommendations of a storefront """
     from resources.lib.modules.catalog import Catalog
     Catalog().show_recommendations(storefront)
 

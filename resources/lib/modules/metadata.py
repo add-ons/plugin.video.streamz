@@ -6,7 +6,7 @@ from __future__ import absolute_import, division, unicode_literals
 import logging
 
 from resources.lib import kodiutils
-from resources.lib.streamz import Program, Movie
+from resources.lib.streamz import Movie, Program
 from resources.lib.streamz.api import Api
 from resources.lib.streamz.auth import Auth
 

@@ -6,7 +6,7 @@ from __future__ import absolute_import, division, unicode_literals
 import json
 import logging
 
-from resources.lib.streamz import ResolvedStream, util, API_ENDPOINT
+from resources.lib.streamz import API_ENDPOINT, ResolvedStream, util
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -190,9 +190,9 @@ class Stream:
         :rtype: str
         """
         try:  # Python 3
-            from urllib.parse import urlencode, quote
+            from urllib.parse import quote, urlencode
         except ImportError:  # Python 2
-            from urllib import urlencode, quote
+            from urllib import quote, urlencode
 
         header = ''
         if key_headers:

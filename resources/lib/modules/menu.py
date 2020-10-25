@@ -7,8 +7,8 @@ import logging
 
 from resources.lib import kodiutils
 from resources.lib.kodiutils import TitleItem
-from resources.lib.streamz import Movie, Program, Episode, STOREFRONT_MAIN, STOREFRONT_MOVIES, STOREFRONT_SERIES, STOREFRONT_KIDS
-from resources.lib.streamz.api import Api, CONTENT_TYPE_MOVIE, CONTENT_TYPE_PROGRAM
+from resources.lib.streamz import STOREFRONT_KIDS, STOREFRONT_MAIN, STOREFRONT_MAIN_KIDS, STOREFRONT_MOVIES, STOREFRONT_SERIES, Episode, Movie, Program
+from resources.lib.streamz.api import CONTENT_TYPE_MOVIE, CONTENT_TYPE_PROGRAM
 from resources.lib.streamz.auth import Auth
 
 _LOGGER = logging.getLogger(__name__)
@@ -24,13 +24,14 @@ class Menu:
                           kodiutils.get_setting('loginprovider'),
                           kodiutils.get_setting('profile'),
                           kodiutils.get_tokens_path())
-        self._api = Api(self._auth)
 
     def show_mainmenu(self):
         """ Show the main menu. """
         listing = []
 
-        if self._auth.login().product == 'STREAMZ':
+        account = self._auth.login()
+
+        if account.product == 'STREAMZ':
             listing.append(TitleItem(
                 title=kodiutils.localize(30015),  # Recommendations
                 path=kodiutils.url_for('show_recommendations', storefront=STOREFRONT_MAIN),
@@ -67,10 +68,22 @@ class Menu:
                 ),
             ))
 
-        elif self._auth.login().product == 'STREAMZ_KIDS':
+            listing.append(TitleItem(
+                title=kodiutils.localize(30021),  # Kids
+                path=kodiutils.url_for('show_recommendations', storefront=STOREFRONT_KIDS),
+                art_dict=dict(
+                    icon='DefaultFavourites.png',
+                    fanart=kodiutils.get_addon_info('fanart'),
+                ),
+                info_dict=dict(
+                    plot=kodiutils.localize(30022),
+                ),
+            ))
+
+        elif account.product == 'STREAMZ_KIDS':
             listing.append(TitleItem(
                 title=kodiutils.localize(30015),  # Recommendations
-                path=kodiutils.url_for('show_recommendations', storefront=STOREFRONT_KIDS),
+                path=kodiutils.url_for('show_recommendations', storefront=STOREFRONT_MAIN_KIDS),
                 art_dict=dict(
                     icon='DefaultFavourites.png',
                     fanart=kodiutils.get_addon_info('fanart'),

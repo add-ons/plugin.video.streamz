@@ -5,11 +5,11 @@ from __future__ import absolute_import, division, unicode_literals
 
 import logging
 
-from resources.lib.kodiplayer import KodiPlayer
 from resources.lib import kodiutils
+from resources.lib.kodiplayer import KodiPlayer
 from resources.lib.streamz.api import Api
 from resources.lib.streamz.auth import Auth
-from resources.lib.streamz.exceptions import UnavailableException, LimitReachedException, StreamGeoblockedException, StreamUnavailableException
+from resources.lib.streamz.exceptions import LimitReachedException, StreamGeoblockedException, StreamUnavailableException, UnavailableException
 from resources.lib.streamz.stream import Stream
 
 _LOGGER = logging.getLogger(__name__)

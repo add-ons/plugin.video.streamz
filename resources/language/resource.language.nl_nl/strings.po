@@ -63,6 +63,14 @@ msgctxt "#30020"
 msgid "Continue watching where you left off"
 msgstr "Kijk verder waar u gebleven was"
 
+msgctxt "#30021"
+msgid "Kids"
+msgstr "Kids"
+
+msgctxt "#30022"
+msgid "Show the VTM GO recommendations for Kids"
+msgstr "Bekijk de VTM GO aanbevelingen voor kinderen"
+
 
 ### SUBMENUS
 
@@ -139,8 +147,8 @@ msgstr "Alle leeftijden"
 ### MESSAGES
 
 msgctxt "#30701"
-msgid "You need to configure your credentials before you can access the content of Streamz."
-msgstr "U moet uw inloggegevens configureren voordat u Streamz kan gebruiken."
+msgid "You need to configure your credentials before you can access the content of Streamz. Do you want to enter them now?"
+msgstr "U moet uw inloggegevens configureren voordat u Streamz kan gebruiken. Wilt u dit nu doen?"
 
 msgctxt "#30702"
 msgid "Unknown error while logging in: {code}"
