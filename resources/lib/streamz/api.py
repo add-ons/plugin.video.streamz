@@ -116,10 +116,7 @@ class Api:
                                      profile=self._tokens.profile)
 
             # Result can be empty
-            if not response.text:
-                return []
-
-            result = json.loads(response.text)
+            result = json.loads(response.text) if response.text else []
 
             kodiutils.set_cache(['swimlane', swimlane], result)
 
