@@ -33,7 +33,7 @@ class BackgroundService(Monitor):
                 self._update_metadata()
 
             # Stop when abort requested
-            if self.waitForAbort(10):
+            if self.waitForAbort(60):
                 break
 
         _LOGGER.debug('Service stopped')
@@ -53,7 +53,13 @@ class BackgroundService(Monitor):
             success = Metadata().fetch_metadata(callback=update_status)
         except NoLoginException:
             # We have no login yet, but that's okay, we will retry later
-            success = True
+            _LOGGER.debug('Skipping background updating since we have no credentials.')
+            return
+
+        except Exception as exc:  # pylint: disable=broad-except
+            _LOGGER.debug('Skipping background updating since we got an error')
+            _LOGGER.exception(exc)
+            return
 
         # Update metadata_last_updated
         if success:
