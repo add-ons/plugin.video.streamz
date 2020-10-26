@@ -599,7 +599,7 @@ def get_cache(key, ttl=None):
 def set_cache(key, data):
     """ Store an item in the cache
     :type key: list[str]
-    :type data: str|None
+    :type data: any
     """
     fullpath = get_cache_path() + '/'
     if not xbmcvfs.exists(fullpath):

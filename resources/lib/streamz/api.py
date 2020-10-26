@@ -104,25 +104,6 @@ class Api:
 
         return items
 
-    def get_swimlane_ids(self, swimlane):
-        """ Returns the IDs of the contents of My List """
-        # Try to fetch from cache
-        result = kodiutils.get_cache(['swimlane', swimlane], 300)  # 5 minutes ttl
-
-        if not result:
-            # Fetch from API
-            response = util.http_get(API_ENDPOINT + '/%s/main/swimlane/%s' % (self._mode(), swimlane),
-                                     token=self._tokens.jwt_token,
-                                     profile=self._tokens.profile)
-
-            # Result can be empty
-            result = json.loads(response.text) if response.text else []
-
-            kodiutils.set_cache(['swimlane', swimlane], result)
-
-        items = [item.get('target', {}).get('id') for item in result.get('teasers', [])]
-        return items
-
     def add_mylist(self, video_type, content_id):
         """ Add an item to My List. """
         util.http_put(API_ENDPOINT + '/%s/userData/myList/%s/%s' % (self._mode(), video_type, content_id),
@@ -369,6 +350,45 @@ class Api:
             progress=episode.get('playerPositionSeconds'),
             next_episode=next_episode,
         )
+
+    def get_mylist_ids(self):
+        """ Returns the IDs of the contents of My List """
+        # Try to fetch from cache
+        items = kodiutils.get_cache(['mylist_id'], 300)  # 5 minutes ttl
+        if items:
+            return items
+
+        # Fetch from API
+        response = util.http_get(API_ENDPOINT + '/%s/main/swimlane/%s' % (self._mode(), 'my-list'),
+                                 token=self._tokens.jwt_token,
+                                 profile=self._tokens.profile)
+
+        # Result can be empty
+        result = json.loads(response.text) if response.text else []
+
+        items = [item.get('target', {}).get('id') for item in result.get('teasers', [])]
+
+        kodiutils.set_cache(['mylist_id'], items)
+        return items
+
+    def get_catalog_ids(self):
+        """ Returns the IDs of the contents of the Catalog """
+        # Try to fetch from cache
+        items = kodiutils.get_cache(['catalog_id'], 300)  # 5 minutes ttl
+        if items:
+            return items
+
+        # Fetch from API
+        response = util.http_get(API_ENDPOINT + '/%s/catalog' % self._mode(),
+                                 params={'pageSize': 2000, 'filter': None},
+                                 token=self._tokens.jwt_token,
+                                 profile=self._tokens.profile)
+        info = json.loads(response.text)
+
+        items = [item.get('target', {}).get('id') for item in info.get('pagedTeasers', {}).get('content', [])]
+
+        kodiutils.set_cache(['catalog_id'], items)
+        return items
 
     def do_search(self, search):
         """ Do a search in the full catalog.

@@ -56,6 +56,14 @@ class TestApi(unittest.TestCase):
         results = self.api.do_search('huis')
         self.assertIsInstance(results, list)
 
+    def test_mylist_ids(self):
+        mylist = self.api.get_mylist_ids()
+        self.assertIsInstance(mylist, list)
+
+    def test_catalog_ids(self):
+        mylist = self.api.get_catalog_ids()
+        self.assertIsInstance(mylist, list)
+
     def test_errors(self):
         with self.assertRaises(UnavailableException):
             self.api.get_movie('0')

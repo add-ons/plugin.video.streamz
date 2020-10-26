@@ -10,7 +10,6 @@ from resources.lib.modules.menu import Menu
 from resources.lib.streamz import Movie, Program
 from resources.lib.streamz.api import CACHE_AUTO, CACHE_PREVENT, CONTENT_TYPE_MOVIE, CONTENT_TYPE_PROGRAM, Api
 from resources.lib.streamz.auth import Auth
-from resources.lib.streamz.exceptions import UnavailableException
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -114,15 +113,11 @@ class Library:
             return
 
         if kodiutils.get_setting_int('library_movies') == LIBRARY_FULL_CATALOG:
-            try:
-                result = self._api.get_movie(movie, cache=CACHE_AUTO)
-            except UnavailableException:
-                result = None
-            kodiutils.library_return_status(result is not None)
-
+            id_list = self._api.get_catalog_ids()
         else:
-            mylist_ids = self._api.get_swimlane_ids('my-list')
-            kodiutils.library_return_status(movie in mylist_ids)
+            id_list = self._api.get_mylist_ids()
+
+        kodiutils.library_return_status(movie in id_list)
 
     def check_library_tvshow(self, program):
         """ Check if the given program is still available. """
@@ -134,15 +129,11 @@ class Library:
             return
 
         if kodiutils.get_setting_int('library_tvshows') == LIBRARY_FULL_CATALOG:
-            try:
-                result = self._api.get_program(program, cache=CACHE_AUTO)
-            except UnavailableException:
-                result = None
-            kodiutils.library_return_status(result is not None)
-
+            id_list = self._api.get_catalog_ids()
         else:
-            mylist_ids = self._api.get_swimlane_ids('my-list')
-            kodiutils.library_return_status(program in mylist_ids)
+            id_list = self._api.get_mylist_ids()
+
+        kodiutils.library_return_status(program in id_list)
 
     @staticmethod
     def mylist_added(video_type, content_id):
