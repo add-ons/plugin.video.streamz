@@ -8,8 +8,6 @@ import logging
 import routing
 
 from resources.lib import kodilogging, kodiutils
-from resources.lib.streamz.exceptions import (NoLoginException, InvalidLoginException, LoginErrorException, NoTelenetSubscriptionException,
-                                              NoStreamzSubscriptionException)
 
 kodilogging.config()
 routing = routing.Plugin()  # pylint: disable=invalid-name

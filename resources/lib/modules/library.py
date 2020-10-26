@@ -8,7 +8,7 @@ import logging
 from resources.lib import kodiutils
 from resources.lib.modules.menu import Menu
 from resources.lib.streamz import Movie, Program
-from resources.lib.streamz.api import Api, CACHE_PREVENT, CACHE_AUTO, CONTENT_TYPE_MOVIE, CONTENT_TYPE_PROGRAM
+from resources.lib.streamz.api import CACHE_AUTO, CACHE_PREVENT, CONTENT_TYPE_MOVIE, CONTENT_TYPE_PROGRAM, Api
 from resources.lib.streamz.auth import Auth
 from resources.lib.streamz.exceptions import UnavailableException
 
