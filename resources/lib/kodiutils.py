@@ -224,6 +224,14 @@ def play(stream, license_key=None, title=None, art_dict=None, info_dict=None, pr
     xbmcplugin.setResolvedUrl(routing.handle, True, listitem=play_item)
 
 
+def library_return_status(success):
+    """Notify Kodi about the status of a listitem."""
+    from resources.lib.addon import routing
+
+    _LOGGER.debug('Returning status %s', success)
+    xbmcplugin.setResolvedUrl(routing.handle, success, listitem=xbmcgui.ListItem())
+
+
 def get_search_string(heading='', message=''):
     """Ask the user for a search string"""
     search_string = None
@@ -243,6 +251,14 @@ def ok_dialog(heading='', message=''):
         # pylint: disable=unexpected-keyword-arg,no-value-for-parameter
         return Dialog().ok(heading=heading, line1=message)
     return Dialog().ok(heading=heading, message=message)
+
+
+def textviewer(heading='', text='', usemono=False):
+    """Show Kodi's textviewer dialog"""
+    from xbmcgui import Dialog
+    if not heading:
+        heading = addon_name()
+    Dialog().textviewer(heading=heading, text=text, usemono=usemono)
 
 
 def show_context_menu(items):
@@ -562,7 +578,6 @@ def get_cache(key, ttl=None):
     import time
 
     fullpath = os.path.join(get_cache_path(), '.'.join(key))
-
     if not xbmcvfs.exists(fullpath):
         return None
 
@@ -584,12 +599,18 @@ def get_cache(key, ttl=None):
 def set_cache(key, data):
     """ Store an item in the cache
     :type key: list[str]
-    :type data: str
+    :type data: str|None
     """
-    if not xbmcvfs.exists(get_cache_path()):
-        xbmcvfs.mkdirs(get_cache_path())
+    fullpath = get_cache_path() + '/'
+    if not xbmcvfs.exists(fullpath):
+        xbmcvfs.mkdirs(fullpath)
 
-    fullpath = os.path.join(get_cache_path(), '.'.join(key))
+    fullpath = os.path.join(fullpath, '.'.join(key))
+
+    if data is None:
+        # Remove from cache
+        xbmcvfs.delete(fullpath)
+        return
 
     fdesc = xbmcvfs.File(fullpath, 'w')
 
@@ -602,8 +623,7 @@ def set_cache(key, data):
 
 def invalidate_cache(ttl=None):
     """ Clear the cache """
-    fullpath = get_cache_path()
-
+    fullpath = get_cache_path() + '/'
     if not xbmcvfs.exists(fullpath):
         return
 
@@ -615,6 +635,21 @@ def invalidate_cache(ttl=None):
         if ttl and now - xbmcvfs.Stat(filepath).st_mtime() < ttl:
             continue
         xbmcvfs.delete(filepath)
+
+
+def cleanup_cache(category, keep):
+    """ Clear the cache by removing missing items. """
+    fullpath = get_cache_path() + '/'
+
+    if not xbmcvfs.exists(fullpath):
+        return
+
+    _, files = xbmcvfs.listdir(fullpath)
+    for filename in files:
+        cat, uuid = filename.split('.')
+        if cat == category and uuid not in keep:
+            _LOGGER.debug('Removing %s from cache since it is missing in the full listing', filename)
+            xbmcvfs.delete(os.path.join(fullpath, filename))
 
 
 def notify(sender, message, data):

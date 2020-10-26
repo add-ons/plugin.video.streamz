@@ -45,7 +45,7 @@ class Metadata:
 
         :type callback: callable
         """
-        # Fetch all items from the catalog
+        # Fetch a list of all items from the catalog
         items = self._api.get_items()
         count = len(items)
 

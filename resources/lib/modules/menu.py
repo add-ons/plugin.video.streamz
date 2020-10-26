@@ -253,6 +253,7 @@ class Menu:
                 art_dict=art_dict,
                 info_dict=info_dict,
                 stream_dict=stream_dict,
+                prop_dict=prop_dict,
                 context_menu=context_menu,
                 is_playable=True,
             )
@@ -278,8 +279,11 @@ class Menu:
                 'fanart': item.image,
             })
             info_dict.update({
-                'mediatype': None,
+                'mediatype': 'tvshow',
                 'season': len(item.seasons),
+            })
+            prop_dict.update({
+                'hash': item.content_hash,
             })
 
             return TitleItem(
@@ -287,6 +291,7 @@ class Menu:
                 path=kodiutils.url_for('show_catalog_program', program=item.program_id),
                 art_dict=art_dict,
                 info_dict=info_dict,
+                prop_dict=prop_dict,
                 context_menu=context_menu,
             )
 
