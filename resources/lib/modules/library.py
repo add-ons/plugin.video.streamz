@@ -115,7 +115,7 @@ class Library:
 
         if kodiutils.get_setting_int('library_movies') == LIBRARY_FULL_CATALOG:
             try:
-                result = self._api.get_movie(movie)
+                result = self._api.get_movie(movie, cache=CACHE_AUTO)
             except UnavailableException:
                 result = None
             kodiutils.library_return_status(result is not None)
@@ -135,7 +135,7 @@ class Library:
 
         if kodiutils.get_setting_int('library_tvshows') == LIBRARY_FULL_CATALOG:
             try:
-                result = self._api.get_program(program, cache=CACHE_PREVENT)
+                result = self._api.get_program(program, cache=CACHE_AUTO)
             except UnavailableException:
                 result = None
             kodiutils.library_return_status(result is not None)
