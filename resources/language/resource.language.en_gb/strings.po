@@ -67,7 +67,7 @@ msgid "Kids"
 msgstr ""
 
 msgctxt "#30022"
-msgid "Show the VTM GO recommendations for Kids"
+msgid "Show the Streamz recommendations for Kids"
 msgstr ""
 
 
