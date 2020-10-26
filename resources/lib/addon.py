@@ -6,10 +6,8 @@ from __future__ import absolute_import, division, unicode_literals
 import logging
 
 import routing
-from requests import HTTPError
 
 from resources.lib import kodilogging, kodiutils
-from resources.lib.streamz.exceptions import InvalidLoginException, LoginErrorException, NoStreamzSubscriptionException, NoTelenetSubscriptionException
 
 kodilogging.config()
 routing = routing.Plugin()  # pylint: disable=invalid-name
@@ -19,46 +17,17 @@ _LOGGER = logging.getLogger(__name__)
 @routing.route('/')
 def index():
     """ Show the profile selection, or go to the main menu. """
-    while True:
-        if not kodiutils.get_setting('username') or not kodiutils.get_setting('password'):
-            if not kodiutils.yesno_dialog(message=kodiutils.localize(30701)):  # You need to configure your credentials...
-                # We have no credentials
-                kodiutils.end_of_directory()
-                kodiutils.execute_builtin('ActivateWindow(Home)')
-                return
-
-            kodiutils.open_settings()
-        else:
-            break
-    try:
-        if kodiutils.get_setting_bool('auto_login') and kodiutils.get_setting('profile'):
-            # We have credentials
-            show_main_menu()
-
-        else:
-            # Ask the user for the profile to use
-            select_profile()
-
-    except InvalidLoginException:
-        kodiutils.ok_dialog(message=kodiutils.localize(30203))  # Your credentials are not valid!
-        kodiutils.open_settings()
+    # Verify credentials
+    from resources.lib.modules.authentication import Authentication
+    if not Authentication.verify_credentials():
         kodiutils.end_of_directory()
+        kodiutils.execute_builtin('ActivateWindow(Home)')
+        return
 
-    except NoStreamzSubscriptionException:
-        kodiutils.ok_dialog(message=kodiutils.localize(30201))  # Your Streamz account has no valid subscription!
-        kodiutils.end_of_directory()
-
-    except NoTelenetSubscriptionException:
-        kodiutils.ok_dialog(message=kodiutils.localize(30202))  # Your Telenet account has no valid subscription!
-        kodiutils.end_of_directory()
-
-    except LoginErrorException as exc:
-        kodiutils.ok_dialog(message=kodiutils.localize(30702, code=exc.code))  # Unknown error while logging in: {code}
-        kodiutils.end_of_directory()
-
-    except HTTPError as exc:
-        kodiutils.ok_dialog(message=kodiutils.localize(30702, code='HTTP %d' % exc.response.status_code))  # Unknown error while logging in: {code}
-        kodiutils.end_of_directory()
+    if kodiutils.get_setting_bool('auto_login') and kodiutils.get_setting('profile'):
+        show_main_menu()
+    else:
+        select_profile()
 
 
 @routing.route('/menu')
