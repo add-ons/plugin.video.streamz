@@ -36,11 +36,6 @@ class Library:
                 # Full catalog
                 # Use cache if available, fetch from api otherwise so we get rich metadata for new content
                 items = self._api.get_items(content_filter=Movie, cache=CACHE_AUTO)
-
-                # Remove old caches
-                # When Kodi does a clean of the library, we validate a movie by its presence in the cache, so we need to make sure that
-                # items that aren't available anymore are also removed from the cache
-                kodiutils.cleanup_cache('movie', [item.movie_id for item in items])
             else:
                 # Only favourites, use cache if available, fetch from api otherwise
                 items = self._api.get_swimlane('my-list', content_filter=Movie)
@@ -50,7 +45,7 @@ class Library:
         listing = []
         for item in items:
             title_item = Menu.generate_titleitem(item)
-            # title_item.path = kodiutils.url_for('library_movies', movie=item.movie_id)
+            # title_item.path = kodiutils.url_for('library_movies', movie=item.movie_id)  # We need a trailing /
             title_item.path = 'plugin://plugin.video.streamz/library/movies/?movie=%s' % item.movie_id
             listing.append(title_item)
 
@@ -65,11 +60,6 @@ class Library:
                 # NOTE: We should probably use CACHE_PREVENT here, so we can pick up new episodes, but we can't since that would
                 #       require a massive amount of API calls for each update. We do this only for programs in 'My list'.
                 items = self._api.get_items(content_filter=Program, cache=CACHE_AUTO)
-
-                # Remove old caches
-                # When Kodi does a clean of the library, we validate a tvshow by its presence in the cache, so we need to make sure that
-                # items that aren't available anymore are also removed from the cache
-                kodiutils.cleanup_cache('program', [item.program_id for item in items])
             else:
                 # Only favourites, don't use cache, fetch from api
                 # If we use CACHE_AUTO, we will miss updates until the user manually opens the program in the Add-on
@@ -81,7 +71,7 @@ class Library:
         listing = []
         for item in items:
             title_item = Menu.generate_titleitem(item)
-            # title_item.path = kodiutils.url_for('library_tvshows', program=item.program_id) + '/'  # Folders need a trailing slash
+            # title_item.path = kodiutils.url_for('library_tvshows', program=item.program_id)  # We need a trailing /
             title_item.path = 'plugin://plugin.video.streamz/library/tvshows/?program={program_id}'.format(program_id=item.program_id)
             listing.append(title_item)
 

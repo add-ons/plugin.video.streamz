@@ -637,21 +637,6 @@ def invalidate_cache(ttl=None):
         xbmcvfs.delete(filepath)
 
 
-def cleanup_cache(category, keep):
-    """ Clear the cache by removing missing items. """
-    fullpath = get_cache_path() + '/'
-
-    if not xbmcvfs.exists(fullpath):
-        return
-
-    _, files = xbmcvfs.listdir(fullpath)
-    for filename in files:
-        cat, uuid = filename.split('.')
-        if cat == category and uuid not in keep:
-            _LOGGER.debug('Removing %s from cache since it is missing in the full listing', filename)
-            xbmcvfs.delete(os.path.join(fullpath, filename))
-
-
 def notify(sender, message, data):
     """ Send a notification to Kodi using JSON RPC """
     result = jsonrpc(method='JSONRPC.NotifyAll', params=dict(
