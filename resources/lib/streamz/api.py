@@ -3,6 +3,7 @@
 
 from __future__ import absolute_import, division, unicode_literals
 
+import hashlib
 import json
 import logging
 
@@ -78,11 +79,8 @@ class Api:
 
         return categories
 
-    def get_swimlane(self, swimlane):
-        """ Returns the contents of a swimlane (My List, Continue Watching).
-
-         :param str swimlane:           The name of the swimlane to fetch.
-         """
+    def get_swimlane(self, swimlane, content_filter=None, cache=CACHE_ONLY):
+        """ Returns the contents of My List """
         response = util.http_get(API_ENDPOINT + '/%s/main/swimlane/%s' % (self._mode(), swimlane),
                                  token=self._tokens.jwt_token,
                                  profile=self._tokens.profile)
@@ -95,14 +93,14 @@ class Api:
 
         items = []
         for item in result.get('teasers'):
-            if item.get('target', {}).get('type') == CONTENT_TYPE_MOVIE:
-                items.append(self._parse_movie_teaser(item))
+            if item.get('target', {}).get('type') == CONTENT_TYPE_MOVIE and content_filter in [None, Movie]:
+                items.append(self._parse_movie_teaser(item, cache=cache))
 
-            elif item.get('target', {}).get('type') == CONTENT_TYPE_PROGRAM:
-                items.append(self._parse_program_teaser(item))
+            elif item.get('target', {}).get('type') == CONTENT_TYPE_PROGRAM and content_filter in [None, Program]:
+                items.append(self._parse_program_teaser(item, cache=cache))
 
-            elif item.get('target', {}).get('type') == CONTENT_TYPE_EPISODE:
-                items.append(self._parse_episode_teaser(item))
+            elif item.get('target', {}).get('type') == CONTENT_TYPE_EPISODE and content_filter in [None, Episode]:
+                items.append(self._parse_episode_teaser(item, cache=cache))
 
         return items
 
@@ -111,12 +109,14 @@ class Api:
         util.http_put(API_ENDPOINT + '/%s/userData/myList/%s/%s' % (self._mode(), video_type, content_id),
                       token=self._tokens.jwt_token,
                       profile=self._tokens.profile)
+        kodiutils.set_cache(['swimlane', 'my-list'], None)
 
     def del_mylist(self, video_type, content_id):
         """ Delete an item from My List. """
         util.http_delete(API_ENDPOINT + '/%s/userData/myList/%s/%s' % (self._mode(), video_type, content_id),
                          token=self._tokens.jwt_token,
                          profile=self._tokens.profile)
+        kodiutils.set_cache(['swimlane', 'my-list'], None)
 
     def get_categories(self):
         """ Get a list of all the categories.
@@ -137,11 +137,13 @@ class Api:
 
         return categories
 
-    def get_items(self, category=None):
+    def get_items(self, category=None, content_filter=None, cache=CACHE_ONLY):
         """ Get a list of all the items in a category.
 
         :type category: str
-        :rtype list[Union[Movie, Program]]
+        :type content_filter: class
+        :type cache: int
+        :rtype list[resources.lib.streamz.Movie | resources.lib.streamz.Program]
         """
         # Fetch from API
         response = util.http_get(API_ENDPOINT + '/%s/catalog' % self._mode(),
@@ -153,11 +155,11 @@ class Api:
 
         items = []
         for item in content:
-            if item.get('target', {}).get('type') == CONTENT_TYPE_MOVIE:
-                items.append(self._parse_movie_teaser(item))
+            if item.get('target', {}).get('type') == CONTENT_TYPE_MOVIE and content_filter in [None, Movie]:
+                items.append(self._parse_movie_teaser(item, cache=cache))
 
-            elif item.get('target', {}).get('type') == CONTENT_TYPE_PROGRAM:
-                items.append(self._parse_program_teaser(item))
+            elif item.get('target', {}).get('type') == CONTENT_TYPE_PROGRAM and content_filter in [None, Program]:
+                items.append(self._parse_program_teaser(item, cache=cache))
 
         return items
 
@@ -198,6 +200,7 @@ class Api:
             legal=movie.get('legalIcons'),
             # aired=movie.get('broadcastTimestamp'),
             channel=self._parse_channel(movie.get('channelLogoUrl')),
+            # my_list=program.get('addedToMyList'),  # Don't use addedToMyList, since we might have cached this info
         )
 
     def get_program(self, program_id, cache=CACHE_AUTO):
@@ -226,6 +229,10 @@ class Api:
 
         channel = self._parse_channel(program.get('channelLogoUrl'))
 
+        # Calculate a hash value of the ids of all episodes
+        program_hash = hashlib.md5()
+        program_hash.update(program.get('id'))
+
         seasons = {}
         for item_season in program.get('seasons', []):
             episodes = {}
@@ -249,6 +256,7 @@ class Api:
                     progress=item_episode.get('playerPositionSeconds', 0),
                     watched=item_episode.get('doneWatching', False),
                 )
+                program_hash.update(item_episode.get('id'))
 
             seasons[item_season.get('index')] = Season(
                 number=item_season.get('index'),
@@ -270,6 +278,8 @@ class Api:
             seasons=seasons,
             channel=channel,
             legal=program.get('legalIcons'),
+            content_hash=program_hash.hexdigest().upper(),
+            # my_list=program.get('addedToMyList'),  # Don't use addedToMyList, since we might have cached this info
         )
 
     @staticmethod
@@ -341,6 +351,45 @@ class Api:
             next_episode=next_episode,
         )
 
+    def get_mylist_ids(self):
+        """ Returns the IDs of the contents of My List """
+        # Try to fetch from cache
+        items = kodiutils.get_cache(['mylist_id'], 300)  # 5 minutes ttl
+        if items:
+            return items
+
+        # Fetch from API
+        response = util.http_get(API_ENDPOINT + '/%s/main/swimlane/%s' % (self._mode(), 'my-list'),
+                                 token=self._tokens.jwt_token,
+                                 profile=self._tokens.profile)
+
+        # Result can be empty
+        result = json.loads(response.text) if response.text else []
+
+        items = [item.get('target', {}).get('id') for item in result.get('teasers', [])]
+
+        kodiutils.set_cache(['mylist_id'], items)
+        return items
+
+    def get_catalog_ids(self):
+        """ Returns the IDs of the contents of the Catalog """
+        # Try to fetch from cache
+        items = kodiutils.get_cache(['catalog_id'], 300)  # 5 minutes ttl
+        if items:
+            return items
+
+        # Fetch from API
+        response = util.http_get(API_ENDPOINT + '/%s/catalog' % self._mode(),
+                                 params={'pageSize': 2000, 'filter': None},
+                                 token=self._tokens.jwt_token,
+                                 profile=self._tokens.profile)
+        info = json.loads(response.text)
+
+        items = [item.get('target', {}).get('id') for item in info.get('pagedTeasers', {}).get('content', [])]
+
+        kodiutils.set_cache(['catalog_id'], items)
+        return items
+
     def do_search(self, search):
         """ Do a search in the full catalog.
         :type search: str
@@ -362,12 +411,13 @@ class Api:
                     items.append(self._parse_program_teaser(item))
         return items
 
-    def _parse_movie_teaser(self, item):
+    def _parse_movie_teaser(self, item, cache=CACHE_ONLY):
         """ Parse the movie json and return an Movie instance.
         :type item: dict
+        :type cache: int
         :rtype Movie
         """
-        movie = self.get_movie(item.get('target', {}).get('id'), cache=CACHE_ONLY)
+        movie = self.get_movie(item.get('target', {}).get('id'), cache=cache)
         if movie:
             # We have a cover from the overview that we don't have in the details
             movie.cover = item.get('imageUrl')
@@ -381,12 +431,13 @@ class Api:
             geoblocked=item.get('geoBlocked'),
         )
 
-    def _parse_program_teaser(self, item):
+    def _parse_program_teaser(self, item, cache=CACHE_ONLY):
         """ Parse the program json and return an Program instance.
         :type item: dict
+        :type cache: int
         :rtype Program
         """
-        program = self.get_program(item.get('target', {}).get('id'), cache=CACHE_ONLY)
+        program = self.get_program(item.get('target', {}).get('id'), cache=cache)
         if program:
             # We have a cover from the overview that we don't have in the details
             program.cover = item.get('imageUrl')
@@ -400,12 +451,13 @@ class Api:
             geoblocked=item.get('geoBlocked'),
         )
 
-    def _parse_episode_teaser(self, item):
+    def _parse_episode_teaser(self, item, cache=CACHE_ONLY):
         """ Parse the episode json and return an Episode instance.
         :type item: dict
+        :type cache: int
         :rtype Episode
         """
-        program = self.get_program(item.get('target', {}).get('programId'), cache=CACHE_ONLY)
+        program = self.get_program(item.get('target', {}).get('programId'), cache=cache)
         episode = self.get_episode_from_program(program, item.get('target', {}).get('id')) if program else None
 
         return Episode(

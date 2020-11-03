@@ -184,7 +184,7 @@ class Catalog:
                 listing.append(Menu.generate_titleitem(item))
 
         # Sort categories by default like in Streamz.
-        kodiutils.show_listing(listing, 30015, content='tvshows')
+        kodiutils.show_listing(listing, 30015, content='tvshows', sort=['unsorted', 'label', 'year', 'duration'])
 
     def show_mylist(self):
         """ Show the items in "My List". """
@@ -196,7 +196,7 @@ class Catalog:
             listing.append(Menu.generate_titleitem(item))
 
         # Sort categories by default like in Streamz.
-        kodiutils.show_listing(listing, 30017, content='tvshows')
+        kodiutils.show_listing(listing, 30017, content='tvshows', sort=['unsorted', 'label', 'year', 'duration'])
 
     def mylist_add(self, video_type, content_id):
         """ Add an item to "My List".
@@ -215,7 +215,6 @@ class Catalog:
         """
         self._api.del_mylist(video_type, content_id)
         kodiutils.end_of_directory()
-        kodiutils.container_refresh()
 
     def show_continuewatching(self):
         """ Show the items in "Continue Watching". """

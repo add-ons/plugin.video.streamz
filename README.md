@@ -22,6 +22,35 @@ De volgende features worden ondersteund:
 * Afspelen van films en series
 * Volledig overzicht van alle content
 * Zoeken in de volledige catalogus
+* Integratie met Kodi bibliotheek
+
+## Integratie met Kodi
+
+Je kan deze Add-on gebruiken als medialocatie in Kodi zodat de films en series ook in je Kodi bibliotheek geindexeerd staan. Ze worden uiteraard nog steeds
+gewoon gestreamed.
+
+Ga hiervoor naar **Instellingen** > **Media** > **Bibliotheek** > **Video's...** (bij bronnen beheren). Kies vervolgens **Toevoegen video's...** en geef
+onderstaande locatie in door **< Geen >** te kiezen. Geef vervolgens de naam op en kies OK. Stel daarna de opties in zoals hieronder opgegeven en bevestig met OK.
+Stem daarna toe om deze locaties te scannen.
+
+* Films:
+  * Locatie: `plugin://plugin.video.streamz/library/movies/`
+  * Naam: **Streamz - Films**
+  * Opties:
+    * Deze map bevat: **Speelfilms**
+    * Kies informatieleverancier: **Local information only**
+    * Films staan in aparte folders die overeenkomen met de filmtitel: **Uit**
+    * Ook onderliggende mappen scannen : **Uit**
+    * Locatie uitsluiten van bibliotheekupdates: **Uit**
+
+* Series:
+  * Locatie: `plugin://plugin.video.streamz/library/tvshows/`
+  * Naam: **Streamz - Series**
+  * Opties:
+    * Deze map bevat: **Series**
+    * Kies informatieleverancier: **Local information only**
+    * Geselecteerde map bevat één enkele serie: **Uit**
+    * Locatie uitsluiten van bibliotheekupdates: **Uit**
 
 ## Screenshots
 
