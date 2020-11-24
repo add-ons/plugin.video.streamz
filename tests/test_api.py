@@ -35,13 +35,13 @@ class TestApi(unittest.TestCase):
         self.assertTrue(items)
 
     def test_recommendations(self):
-        main_recommendations = self.api.get_recommendations(STOREFRONT_MAIN)
+        main_recommendations = self.api.get_storefront(STOREFRONT_MAIN)
         self.assertIsInstance(main_recommendations, list)
 
-        movie_recommendations = self.api.get_recommendations(STOREFRONT_MOVIES)
+        movie_recommendations = self.api.get_storefront(STOREFRONT_MOVIES)
         self.assertIsInstance(movie_recommendations, list)
 
-        serie_recommendations = self.api.get_recommendations(STOREFRONT_SERIES)
+        serie_recommendations = self.api.get_storefront(STOREFRONT_SERIES)
         self.assertIsInstance(serie_recommendations, list)
 
     def test_continuewatching(self):
