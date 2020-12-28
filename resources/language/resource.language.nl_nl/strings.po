@@ -158,6 +158,10 @@ msgctxt "#30703"
 msgid "Your account has no profiles defined. Please login on www.streamz.be and create a profile."
 msgstr "Uw account heeft geen profielen. Gelieve in te loggen op www.streamz.be en een profiel aan te maken."
 
+msgctxt "#30704"
+msgid "You need to complete a captcha before you can continue. Please login on www.streamz.be with a web browser and try again."
+msgstr "U moet een captcha vervolledigen voordat u kan verdergaan. Gelieve in te loggen op www.streamz.be met een webbrowser en probeer opnieuw."
+
 msgctxt "#30708"
 msgid "Please restart Kodi."
 msgstr "Gelieve Kodi te herstarten."

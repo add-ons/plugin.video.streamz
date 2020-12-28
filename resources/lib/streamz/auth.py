@@ -10,8 +10,8 @@ import re
 from hashlib import md5
 
 from resources.lib.streamz import API_ENDPOINT, Profile, util
-from resources.lib.streamz.exceptions import (InvalidLoginException, LoginErrorException, NoLoginException, NoStreamzSubscriptionException,
-                                              NoTelenetSubscriptionException)
+from resources.lib.streamz.exceptions import (CaptchaRequiredException, InvalidLoginException, LoginErrorException, NoLoginException,
+                                              NoStreamzSubscriptionException, NoTelenetSubscriptionException)
 
 try:  # Python 3
     from urllib.parse import parse_qs, urlsplit
@@ -227,6 +227,9 @@ class Auth:
 
             if 'Je gebruikersnaam en/of wachtwoord zijn verkeerd' in response.text:
                 raise InvalidLoginException
+
+            if 'Vul de beveiligingscontrole in om verder te gaan' in response.text:
+                raise CaptchaRequiredException
 
         else:
             raise Exception('Unsupported login method: %s' % self._loginprovider)

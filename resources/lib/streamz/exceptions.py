@@ -16,6 +16,10 @@ class InvalidLoginException(Exception):
     """ Is thrown when the credentials are invalid. """
 
 
+class CaptchaRequiredException(Exception):
+    """ Is thrown when a captcha should be filled in. """
+
+
 class NoStreamzSubscriptionException(Exception):
     """ Is thrown when you don't have an subscription with Streamz. """
 
