@@ -136,7 +136,7 @@ class Player:
         license_key = self._stream.create_license_key(resolved_stream.license_url)
 
         # Play this item
-        kodiutils.play(url, license_key, resolved_stream.title, {}, info_dict, prop_dict, stream_dict)
+        kodiutils.play(url, license_key, resolved_stream.title, {}, info_dict, prop_dict, stream_dict, subtitles=resolved_stream.subtitles)
 
         # Wait for playback to start
         kodi_player = KodiPlayer()
