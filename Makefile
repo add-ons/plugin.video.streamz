@@ -24,15 +24,11 @@ languages = $(filter-out en_gb, $(patsubst resources/language/resource.language.
 all: check test build
 zip: build
 
-check: check-pylint check-tox check-translations
+check: check-pylint check-translations
 
 check-pylint:
 	@echo ">>> Running pylint checks"
 	@$(PYTHON) -m pylint *.py resources/lib/ tests/
-
-check-tox:
-	@echo ">>> Running tox checks"
-	@$(PYTHON) -m tox -q
 
 check-translations:
 	@echo ">>> Running translation checks"
@@ -60,7 +56,7 @@ test-unit:
 clean:
 	@find . -name '*.py[cod]' -type f -delete
 	@find . -name '__pycache__' -type d -delete
-	@rm -rf .pytest_cache/ .tox/ tests/cdm tests/userdata/temp
+	@rm -rf .pytest_cache/ tests/cdm tests/userdata/temp
 	@rm -f *.log .coverage
 
 build: clean

@@ -1,10 +1,10 @@
 coverage:
-  range: 20..100
+  range: 50..100
   round: nearest
   status:
     project:
       default:
-        target: 20%
+        target: 75%
         threshold: 6%
     patch: false
 comment: false
