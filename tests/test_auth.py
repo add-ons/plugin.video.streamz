@@ -30,7 +30,7 @@ class TestAuth(unittest.TestCase):
         cls.api = Api(cls.auth)
 
     def test_login(self):
-        account = self.auth.login()
+        account = self.auth.get_tokens()
         self.assertIsInstance(account, AccountStorage)
 
         profiles = self.auth.get_profiles()
