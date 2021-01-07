@@ -1,15 +1,20 @@
-# Temporary files
 *.pyc
 *.pyo
+.DS*
+.pylint_rc
+/.idea
+/.project
+/.pydevproject
+/.settings
 Thumbs.db
 *~
-
-# IDE
-/.idea/
+.cache
+.coverage
+coverage.xml
 
 # Testing
-Pipfile*
-.tox/
-.coverage/
-tests/home/userdata/addon_data/
+tests/home/userdata/addon_data
 .env
+
+Pipfile
+Pipfile.lock

@@ -27,6 +27,10 @@ class TestApi(unittest.TestCase):
                         kodiutils.get_tokens_path())
         cls.api = Api(cls.auth)
 
+    def test_get_config(self):
+        config = self.api.get_config()
+        self.assertTrue(config)
+
     def test_catalog(self):
         categories = self.api.get_categories()
         self.assertTrue(categories)
