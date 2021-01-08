@@ -5,7 +5,7 @@ on:
       - 'v*'
 jobs:
   build:
-    name: Release plugin.video.streamz.go
+    name: Release plugin.video.streamz
     if: startsWith(github.ref, 'refs/tags/')  # prevent from running if it's not a tag
     runs-on: ubuntu-latest
     steps:
