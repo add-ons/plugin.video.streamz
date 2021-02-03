@@ -38,7 +38,7 @@ class TestStream(unittest.TestCase):
     def test_stream(self):
         # Find the first movie from the catalog
         items = self.api.get_items()
-        movie = next(item for item in items if isinstance(item, Movie))
+        movie = next(item for item in items if isinstance(item, Movie) if item.available)
         _LOGGER.info('Playing %s', movie)
 
         stream = self.stream.get_stream('movies', movie.movie_id)
