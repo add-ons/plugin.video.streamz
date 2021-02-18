@@ -11,7 +11,8 @@ from resources.lib import kodiutils
 from resources.lib.kodiutils import TitleItem
 from resources.lib.streamz.api import Api
 from resources.lib.streamz.auth import Auth
-from resources.lib.streamz.exceptions import InvalidLoginException, LoginErrorException, NoStreamzSubscriptionException, NoTelenetSubscriptionException
+from resources.lib.streamz.exceptions import (CaptchaRequiredException, InvalidLoginException, LoginErrorException, NoStreamzSubscriptionException,
+                                              NoTelenetSubscriptionException)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -33,7 +34,6 @@ class Authentication:
         """ Verify if the user has credentials and if they are valid. """
         retry = False
         while True:
-
             # Check if the user has credentials
             if retry or not kodiutils.get_setting('username') or not kodiutils.get_setting('password'):
 
@@ -64,6 +64,10 @@ class Authentication:
             except NoTelenetSubscriptionException:
                 kodiutils.ok_dialog(message=kodiutils.localize(30202))  # Your Telenet account has no valid subscription!
                 retry = True
+
+            except CaptchaRequiredException:
+                kodiutils.ok_dialog(message=kodiutils.localize(30704))  # You need to complete a captcha before you can continue...
+                retry = False
 
             except LoginErrorException as exc:
                 kodiutils.ok_dialog(message=kodiutils.localize(30702, code=exc.code))  # Unknown error while logging in: {code}
