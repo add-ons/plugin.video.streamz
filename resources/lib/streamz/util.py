@@ -52,7 +52,7 @@ def http_get(url, params=None, token=None, profile=None, headers=None):
         raise
 
 
-def http_post(url, params=None, form=None, data=None, token=None, profile=None, headers=None):
+def http_post(url, params=None, form=None, data=None, token=None, profile=None, headers=None, allow_redirects=True):
     """ Make a HTTP POST request for the specified URL.
 
     :param str url:                 The URL to call.
@@ -67,7 +67,7 @@ def http_post(url, params=None, form=None, data=None, token=None, profile=None, 
     :rtype: requests.Response
     """
     try:
-        return _request('POST', url=url, params=params, form=form, data=data, token=token, profile=profile, headers=headers)
+        return _request('POST', url=url, params=params, form=form, data=data, token=token, profile=profile, headers=headers, allow_redirects=allow_redirects)
     except HTTPError as exc:
         if exc.response.status_code == 401:
             raise InvalidTokenException(exc)
@@ -130,7 +130,7 @@ def http_delete(url, params=None, token=None, profile=None, headers=None):
         raise
 
 
-def _request(method, url, params=None, form=None, data=None, token=None, profile=None, headers=None):
+def _request(method, url, params=None, form=None, data=None, token=None, profile=None, headers=None, allow_redirects=True):
     """ Makes a request for the specified URL.
 
     :param str method:              The HTTP Method to use.
@@ -164,7 +164,7 @@ def _request(method, url, params=None, form=None, data=None, token=None, profile
     if profile:
         headers['x-dpp-profile'] = profile
 
-    response = SESSION.request(method, url, params=params, data=form, json=data, headers=headers, proxies=PROXIES)
+    response = SESSION.request(method, url, params=params, data=form, json=data, headers=headers, proxies=PROXIES, allow_redirects=allow_redirects)
 
     # Set encoding to UTF-8 if no charset is indicated in http headers (https://github.com/psf/requests/issues/1604)
     if not response.encoding:

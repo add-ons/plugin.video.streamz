@@ -3,26 +3,29 @@
 
 from __future__ import absolute_import, division, unicode_literals
 
+import base64
+import hashlib
 import json
 import logging
 import os
+import random
 import re
-from hashlib import md5
+import string
 
 from resources.lib.streamz import API_ENDPOINT, Profile, util
 from resources.lib.streamz.exceptions import (InvalidLoginException, LoginErrorException, NoLoginException, NoStreamzSubscriptionException,
-                                              NoTelenetSubscriptionException)
-
-try:  # Python 3
-    from urllib.parse import parse_qs, urlsplit
-except ImportError:  # Python 2
-    from urlparse import parse_qs, urlsplit
+                                              NoTelenetSubscriptionException, InvalidTokenException)
 
 try:  # Python 3
     import jwt
 except ImportError:  # Python 2
     # The package is named pyjwt in Kodi 18: https://github.com/lottaboost/script.module.pyjwt/pull/1
     import pyjwt as jwt
+
+try:  # Python 3
+    from urllib.parse import parse_qs, urlparse, urlsplit
+except ImportError:  # Python 2
+    from urlparse import parse_qs, urlparse, urlsplit
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -67,8 +70,7 @@ class Auth:
 
     TOKEN_FILE = 'auth-tokens.json'
     CLIENT_ID = 'WWl9F97L9m56SrPcTmC2hYkCCKcmxevS'  # Website
-
-    # CLIENT_ID = '6sMlUPtp8BsujHOvtkvtC9DJv0gZjP3p'  # Android APP
+    ANDROID_CLIENT_ID = '6sMlUPtp8BsujHOvtkvtC9DJv0gZjP3p'  # Android APP
 
     def __init__(self, username, password, loginprovider, profile, token_path):
         """ Initialise object """
@@ -108,7 +110,7 @@ class Auth:
         :rtype: str
         """
         old_hash = self._account.hash
-        new_hash = md5((self._username + ':' + self._password + ':' + self._loginprovider).encode('utf-8')).hexdigest()
+        new_hash = hashlib.md5((self._username + ':' + self._password + ':' + self._loginprovider).encode('utf-8')).hexdigest()
 
         if new_hash != old_hash:
             return new_hash
@@ -156,7 +158,10 @@ class Auth:
         # Use cached token if it is still valid
         if force or not self._account.is_valid_token():
             # Do actual login
-            self._web_login()
+            if self._loginprovider == LOGIN_STREAMZ:
+                self._android_login()
+            else:
+                self._telenet_login()
 
     def get_tokens(self):
         """ Return the tokens.
@@ -166,7 +171,7 @@ class Auth:
         """
         return self._account
 
-    def _web_login(self):
+    def _telenet_login(self):
         """ Executes a login and returns the JSON Web Token.
         :rtype str
         """
@@ -175,75 +180,34 @@ class Auth:
         util.http_get('https://account.streamz.be/login')
 
         # Generate random state and nonce parameters
-        import random
-        import string
         state = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(32))
         nonce = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(32))
 
-        if self._loginprovider == LOGIN_STREAMZ:
+        # Obtain authorization
+        util.http_get('https://login.streamz.be/authorize',
+                      params={
+                          'audience': 'https://streamz.eu.auth0.com/api/v2/',
+                          'domain': 'login.streamz.be',
+                          'client_id': self.CLIENT_ID,
+                          'response_type': 'id_token token',
+                          'redirect_uri': 'https://account.streamz.be/callback',
+                          'scope': 'read:current_user profile email openid',
+                          'connection': 'TN',
+                          'state': state,
+                          'nonce': nonce,
+                          'auth0Client': 'eyJuYW1lIjoiYXV0aDAuanMiLCJ2ZXJzaW9uIjoiOS4xMy4yIn0=',  # base64 encoded {"name":"auth0.js","version":"9.13.2"}
+                      })
 
-            # Send login credentials
-            response = util.http_post('https://login.streamz.be/co/authenticate',
-                                      data={
-                                          "client_id": self.CLIENT_ID,
-                                          "username": self._username,
-                                          "password": self._password,
-                                          "realm": "Username-Password-Authentication",
-                                          "credential_type": "http://auth0.com/oauth/grant-type/password-realm"
-                                      },
-                                      headers={
-                                          'Origin': 'https://account.streamz.be',
-                                          'Referer': 'https://account.streamz.be',
-                                      })
-            login_data = json.loads(response.text)
+        # Send login credentials
+        response = util.http_post('https://login.prd.telenet.be/openid/login.do',
+                                  form={
+                                      'j_username': self._username,
+                                      'j_password': self._password,
+                                      'rememberme': 'true',
+                                  })
 
-            # Obtain authorization
-            response = util.http_get('https://login.streamz.be/authorize',
-                                     params={
-                                         'audience': 'https://streamz.eu.auth0.com/api/v2/',
-                                         'domain': 'login.streamz.be',
-                                         'client_id': self.CLIENT_ID,
-                                         'response_type': 'id_token token',
-                                         'redirect_uri': 'https://account.streamz.be/callback',
-                                         'scope': 'read:current_user profile email openid',
-                                         'state': state,
-                                         'nonce': nonce,
-                                         'auth0Client': 'eyJuYW1lIjoiYXV0aDAuanMiLCJ2ZXJzaW9uIjoiOS4xMy4yIn0=',
-                                         # base64 encoded {"name":"auth0.js","version":"9.13.2"}
-                                         'realm': 'Username-Password-Authentication',
-                                         'login_ticket': login_data.get('login_ticket'),
-                                     })
-
-        elif self._loginprovider == LOGIN_TELENET:
-
-            # Obtain authorization
-            util.http_get('https://login.streamz.be/authorize',
-                          params={
-                              'audience': 'https://streamz.eu.auth0.com/api/v2/',
-                              'domain': 'login.streamz.be',
-                              'client_id': self.CLIENT_ID,
-                              'response_type': 'id_token token',
-                              'redirect_uri': 'https://account.streamz.be/callback',
-                              'scope': 'read:current_user profile email openid',
-                              'connection': 'TN',
-                              'state': state,
-                              'nonce': nonce,
-                              'auth0Client': 'eyJuYW1lIjoiYXV0aDAuanMiLCJ2ZXJzaW9uIjoiOS4xMy4yIn0=',  # base64 encoded {"name":"auth0.js","version":"9.13.2"}
-                          })
-
-            # Send login credentials
-            response = util.http_post('https://login.prd.telenet.be/openid/login.do',
-                                      form={
-                                          'j_username': self._username,
-                                          'j_password': self._password,
-                                          'rememberme': 'true',
-                                      })
-
-            if 'Je gebruikersnaam en/of wachtwoord zijn verkeerd' in response.text:
-                raise InvalidLoginException
-
-        else:
-            raise Exception('Unsupported login method: %s' % self._loginprovider)
+        if 'Je gebruikersnaam en/of wachtwoord zijn verkeerd' in response.text:
+            raise InvalidLoginException
 
         # Extract login_token
         params = parse_qs(urlsplit(response.url).fragment)
@@ -279,6 +243,87 @@ class Auth:
 
         # Get JWT from cookies
         self._account.jwt_token = util.SESSION.cookies.get('lfvp_auth')
+
+        self._save_cache()
+
+        return self._account
+
+    def _android_login(self):
+        """ Executes an android login and returns the JSON Web Token.
+        :rtype str
+        """
+        # We should start fresh
+        util.SESSION.cookies.clear()
+
+        # Generate random state and nonce parameters
+        state = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(32))
+        nonce = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(32))
+        code_verifier = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(64))
+        code_challenge = base64.urlsafe_b64encode(hashlib.sha256(code_verifier.encode('ascii')).digest()).decode('ascii')[:-1]
+
+        # Start login flow
+        response = util.http_get('https://login.streamz.be/authorize', params={
+            'scope': 'openid',
+            'auth0Client': 'eyJuYW1lIjoiQXV0aDAuQW5kcm9pZCIsImVudiI6eyJhbmRyb2lkIjoiMjMifSwidmVyc2lvbiI6IjEuMjMuMCJ9',
+            'client_id': self.ANDROID_CLIENT_ID,
+            'code_challenge_method': 'S256',
+            'state': state,
+            'response_type': 'code',
+            'redirect_uri': 'streamz://login.streamz.be/android/be.dpgmedia.streamz/callback',
+            'code_challenge': code_challenge,
+            'nonce': nonce,
+        })
+
+        params = parse_qs(urlparse(response.url).query)
+        form_state = params.get('state')[0]
+
+        # Send login credentials
+        try:
+            response = util.http_post('https://login.streamz.be/usernamepassword/login',
+                                      form={
+                                          '_intstate': 'deprecated',
+                                          'client_id': self.ANDROID_CLIENT_ID,
+                                          'connection': 'Username-Password-Authentication',
+                                          'nonce': nonce,
+                                          'password': self._password,
+                                          'redirect_uri': 'streamz://login.streamz.be/android/be.dpgmedia.streamz/callback',
+                                          'response_type': 'code',
+                                          'scope': 'openid',
+                                          'state': form_state,
+                                          'tenant': 'streamz',
+                                          'username': self._username
+                                      })
+        except InvalidTokenException:
+            raise InvalidLoginException
+
+        # Extract wa, wresult and wctx
+        matches = re.findall(r'name="([^"]+)"\s+value="([^"]+)"', response.text, flags=re.DOTALL)
+        form = dict(matches)
+        form['wctx'] = form['wctx'].replace('&#34;', '"')
+
+        # Follow login
+        response = util.http_post('https://login.streamz.be/login/callback', form=form, allow_redirects=False)
+        params = parse_qs(urlparse(response.headers.get('location')).query)
+
+        # Okay, final stage. We now need to authorize our code and code_verifier to get a valid JWT.
+        response = util.http_post('https://login.streamz.be/oauth/token', data={
+            "client_id": self.ANDROID_CLIENT_ID,
+            "code": params.get('code')[0],
+            "code_verifier": code_verifier,
+            "grant_type": "authorization_code",
+            "redirect_uri": "streamz://login.streamz.be/android/be.dpgmedia.streamz/callback"
+        })
+        data = json.loads(response.text)
+
+        # Get JWT from reply
+        id_token = data.get('id_token')
+
+        response = util.http_post('https://lfvp-api.dpgmedia.net/authorize/idToken', data={
+            "clientId": self.ANDROID_CLIENT_ID,
+            "pipIdToken": id_token,
+        })
+
+        self._account.jwt_token = json.loads(response.text).get('jsonWebToken')
 
         self._save_cache()
 
