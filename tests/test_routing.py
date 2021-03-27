@@ -39,11 +39,7 @@ class TestRouting(unittest.TestCase):
         routing.run([routing.url_for(addon.show_main_menu), '0', ''])
 
     def test_catalog_menu(self):
-        routing.run([routing.url_for(addon.show_catalog), '0', ''])
         routing.run([routing.url_for(addon.show_catalog_all), '0', ''])
-
-    def test_catalog_category_menu(self):
-        routing.run([routing.url_for(addon.show_catalog_category, category='vlaamse-filmtoppers'), '0', ''])
 
     def test_catalog_program_menu(self):
         routing.run([routing.url_for(addon.show_catalog_program, program=EXAMPLE_PROGRAM), '0', ''])
