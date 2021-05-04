@@ -4,6 +4,7 @@
 from __future__ import absolute_import, division, unicode_literals
 
 API_ENDPOINT = 'https://lfvp-api.dpgmedia.net'
+API_ANDROID_ENDPOINT = 'https://lfvp-android-api.dpgmedia.net'
 
 # These seem to be hardcoded
 STOREFRONT_MAIN = 'eba52f64-92da-4fec-804b-278ebafc75fd'
@@ -11,6 +12,8 @@ STOREFRONT_MOVIES = '4f163159-15c3-452c-b275-1747b144cfa0'
 STOREFRONT_SERIES = 'dba19d15-1ddf-49ef-8eb5-99c59a1fb377'
 STOREFRONT_KIDS = 'a53d1ec3-ab43-4942-9d31-4f4754b4f519'
 STOREFRONT_MAIN_KIDS = 'e0c175c0-a43c-4eed-bdca-e1e95a726bc0'
+
+STOREFRONT_PAGE_CONTINUE_WATCHING = '874707b2-64a2-4846-90a9-a3514893593d'
 
 
 class Profile:

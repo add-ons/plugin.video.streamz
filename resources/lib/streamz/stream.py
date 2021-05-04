@@ -87,9 +87,9 @@ class Stream:
         :rtype: dict
         """
         if strtype == 'movies':
-            url = API_ENDPOINT + '/%s/play/movie/%s' % (self._mode(), stream_id)
+            url = API_ENDPOINT + '/%s/play/movies/%s' % (self._mode(), stream_id)
         elif strtype == 'episodes':
-            url = API_ENDPOINT + '/%s/play/episode/%s' % (self._mode(), stream_id)
+            url = API_ENDPOINT + '/%s/play/episodes/%s' % (self._mode(), stream_id)
         else:
             raise Exception('Unknown stream type: %s' % strtype)
 

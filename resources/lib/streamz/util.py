@@ -32,8 +32,8 @@ class StreamzAdapter(BaseAdapter):
 # Setup a static session that can be reused for all calls
 SESSION = requests.Session()
 SESSION.headers = {
-    'User-Agent': 'STREAMZ/1.0.0 (be.dpgmedia.streamz; build:12544; Android 23) okhttp/4.6.0',
-    'x-app-version': '8',
+    'User-Agent': 'STREAMZ/10.4 (be.dpgmedia.streamz; build:13378; Android 23) okhttp/4.9.0',
+    'x-app-version': '10',
     'x-persgroep-mobile-app': 'true',
     'x-persgroep-os': 'android',
     'x-persgroep-os-version': '23',
@@ -175,7 +175,7 @@ def _request(method, url, params=None, form=None, data=None, token=None, profile
         headers = {}
 
     if token:
-        headers['x-dpp-jwt'] = token
+        headers['lfvp-auth'] = token
 
     if profile:
         headers['x-dpp-profile'] = profile
