@@ -59,7 +59,7 @@ class Api:
 
         items = []
         for row in result.get('rows', []):
-            if row.get('rowType') in ['SWIMLANE_DEFAULT', 'SWIMLANE_LANDSCAPE']:
+            if row.get('rowType') in ['SWIMLANE_DEFAULT', 'SWIMLANE_PORTRAIT', 'SWIMLANE_LANDSCAPE']:
                 items.append(Category(
                     category_id=row.get('id'),
                     title=row.get('title'),
@@ -75,7 +75,7 @@ class Api:
                         items.append(self._parse_program_teaser(item))
                 continue
 
-            if row.get('rowType') == 'MARKETING_BLOCK':
+            if row.get('rowType') in ['TOP_BANNER', 'MARKETING_BLOCK']:
                 item = row.get('teaser')
                 if item.get('target', {}).get('type') == CONTENT_TYPE_MOVIE:
                     items.append(self._parse_movie_teaser(item))
@@ -107,6 +107,9 @@ class Api:
 
             elif item.get('target', {}).get('type') == CONTENT_TYPE_PROGRAM:
                 items.append(self._parse_program_teaser(item))
+
+            elif item.get('target', {}).get('type') == CONTENT_TYPE_EPISODE:
+                items.append(self._parse_episode_teaser(item))
 
         return Category(category_id=category, title=result.get('row', {}).get('title'), content=items)
 
@@ -204,8 +207,8 @@ class Api:
             name=movie.get('name'),
             description=movie.get('description'),
             duration=movie.get('durationSeconds'),
-            cover=movie.get('bigPhotoUrl'),
-            image=movie.get('bigPhotoUrl'),
+            thumb=movie.get('teaserImageUrl'),
+            fanart=movie.get('bigPhotoUrl'),
             year=movie.get('productionYear'),
             geoblocked=movie.get('geoBlocked'),
             remaining=movie.get('remainingDaysAvailable'),
@@ -260,7 +263,8 @@ class Api:
                     name=item_episode.get('name'),
                     description=item_episode.get('description'),
                     duration=item_episode.get('durationSeconds'),
-                    cover=item_episode.get('bigPhotoUrl'),
+                    thumb=item_episode.get('bigPhotoUrl'),
+                    fanart=item_episode.get('bigPhotoUrl'),
                     geoblocked=program.get('geoBlocked'),
                     remaining=item_episode.get('remainingDaysAvailable'),
                     channel=channel,
@@ -275,9 +279,6 @@ class Api:
             seasons[item_season.get('index')] = Season(
                 number=item_season.get('index'),
                 episodes=episodes,
-                cover=item_season.get('episodes', [{}])[0].get('bigPhotoUrl')
-                if episodes else program.get('bigPhotoUrl'),
-                geoblocked=program.get('geoBlocked'),
                 channel=channel,
                 legal=program.get('legalIcons'),
             )
@@ -286,8 +287,8 @@ class Api:
             program_id=program.get('id'),
             name=program.get('name'),
             description=program.get('description'),
-            cover=program.get('bigPhotoUrl'),
-            image=program.get('bigPhotoUrl'),
+            thumb=program.get('teaserImageUrl'),
+            fanart=program.get('bigPhotoUrl'),
             geoblocked=program.get('geoBlocked'),
             seasons=seasons,
             channel=channel,
@@ -353,7 +354,7 @@ class Api:
                 program_name=next_playable['title'],
                 name=next_playable['subtitle'],
                 description=next_playable['description'],
-                cover=next_playable['imageUrl'],
+                poster=next_playable['imageUrl'],
             )
         else:
             next_episode = None
@@ -361,7 +362,7 @@ class Api:
         return Episode(
             episode_id=episode.get('id'),
             name=episode.get('title'),
-            cover=episode.get('posterImageUrl'),
+            poster=episode.get('posterImageUrl'),
             progress=episode.get('playerPositionSeconds'),
             next_episode=next_episode,
         )
@@ -434,17 +435,13 @@ class Api:
         """
         movie = self.get_movie(item.get('target', {}).get('id'), cache=cache)
         if movie:
-            # We might have a cover from the overview that we don't have in the details
-            if item.get('imageUrl'):
-                movie.cover = item.get('imageUrl')
             movie.available = item.get('blockedFor') != 'SUBSCRIPTION'
             return movie
 
         return Movie(
             movie_id=item.get('target', {}).get('id'),
             name=item.get('title'),
-            cover=item.get('imageUrl'),
-            image=item.get('imageUrl'),
+            thumb=item.get('imageUrl'),
             geoblocked=item.get('geoBlocked'),
             available=item.get('blockedFor') != 'SUBSCRIPTION',
         )
@@ -457,17 +454,13 @@ class Api:
         """
         program = self.get_program(item.get('target', {}).get('id'), cache=cache)
         if program:
-            # We might have a cover from the overview that we don't have in the details
-            if item.get('imageUrl'):
-                program.cover = item.get('imageUrl')
             program.available = item.get('blockedFor') != 'SUBSCRIPTION'
             return program
 
         return Program(
             program_id=item.get('target', {}).get('id'),
             name=item.get('title'),
-            cover=item.get('imageUrl'),
-            image=item.get('imageUrl'),
+            thumb=item.get('imageUrl'),
             geoblocked=item.get('geoBlocked'),
             available=item.get('blockedFor') != 'SUBSCRIPTION',
         )
@@ -488,7 +481,7 @@ class Api:
             name=item.get('label'),
             description=episode.description if episode else None,
             geoblocked=item.get('geoBlocked'),
-            cover=item.get('imageUrl'),
+            thumb=item.get('imageUrl'),
             progress=item.get('playerPositionSeconds'),
             watched=False,
             remaining=item.get('remainingDaysAvailable'),
