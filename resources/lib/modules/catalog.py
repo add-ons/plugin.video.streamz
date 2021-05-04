@@ -8,7 +8,7 @@ import logging
 from resources.lib import kodiutils
 from resources.lib.kodiutils import TitleItem
 from resources.lib.modules.menu import Menu
-from resources.lib.streamz import STOREFRONT_MOVIES, STOREFRONT_SERIES, Category
+from resources.lib.streamz import STOREFRONT_MAIN, STOREFRONT_MOVIES, STOREFRONT_PAGE_CONTINUE_WATCHING, STOREFRONT_SERIES, Category
 from resources.lib.streamz.api import CACHE_PREVENT, Api
 from resources.lib.streamz.auth import Auth
 from resources.lib.streamz.exceptions import UnavailableException
@@ -188,7 +188,7 @@ class Catalog:
 
     def show_mylist(self):
         """ Show the items in "My List". """
-        mylist = self._api.get_swimlane('my-list')
+        mylist = self._api.get_mylist('my-list')
 
         listing = []
         for item in mylist:
@@ -218,10 +218,10 @@ class Catalog:
 
     def show_continuewatching(self):
         """ Show the items in "Continue Watching". """
-        mylist = self._api.get_swimlane('continue-watching')
+        category = self._api.get_storefront_category(STOREFRONT_MAIN, STOREFRONT_PAGE_CONTINUE_WATCHING)
 
         listing = []
-        for item in mylist:
+        for item in category.content:
             titleitem = Menu.generate_titleitem(item, progress=True)
 
             # Add Program Name to title since this list contains episodes from multiple programs

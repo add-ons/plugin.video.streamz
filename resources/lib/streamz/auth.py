@@ -158,7 +158,7 @@ class Auth:
         # Use cached token if it is still valid
         if force or not self._account.is_valid_token():
             # Do actual login
-            self._do_login()
+            self._android_login()
 
     def get_tokens(self):
         """ Return the tokens.
@@ -168,7 +168,7 @@ class Auth:
         """
         return self._account
 
-    def _do_login(self):
+    def _android_login(self):
         """ Executes an android login and returns the JSON Web Token.
         :rtype str
         """
@@ -275,13 +275,12 @@ class Auth:
         # Get JWT from reply
         id_token = data.get('id_token')
 
-        # Authenticate with our id_token to get a jwt_token
-        response = util.http_post('https://lfvp-api.dpgmedia.net/authorize/idToken', data={
-            "clientId": self.CLIENT_ID,
-            "pipIdToken": id_token,
+        # Okay, final stage. We now need to authorize our id_token so we get a valid JWT.
+        response = util.http_post('https://lfvp-api.dpgmedia.net/streamz/tokens', data={
+            'idToken': id_token,
         })
 
-        self._account.jwt_token = json.loads(response.text).get('jsonWebToken')
+        self._account.jwt_token = json.loads(response.text).get('lfvpToken')
 
         # Get a list of profiles so we can check our authentication
         try:
@@ -312,3 +311,7 @@ class Auth:
 
         with open(os.path.join(self._token_path, self.TOKEN_FILE), 'w') as fdesc:
             json.dump(self._account.__dict__, fdesc, indent=2)
+
+    def delete_cache(self):
+        """ Delete tokens from cache """
+        os.remove(os.path.join(self._token_path, self.TOKEN_FILE))
