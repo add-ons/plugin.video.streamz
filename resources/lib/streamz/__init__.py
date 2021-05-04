@@ -61,15 +61,16 @@ class Category:
 class Movie:
     """ Defines a Movie """
 
-    def __init__(self, movie_id=None, name=None, description=None, year=None, cover=None, image=None, duration=None,
+    def __init__(self, movie_id=None, name=None, description=None, year=None, poster=None, thumb=None, fanart=None, duration=None,
                  remaining=None, geoblocked=None, channel=None, legal=None, aired=None, my_list=None, available=True):
         """
         :type movie_id: str
         :type name: str
         :type description: str
         :type year: int
-        :type cover: str
-        :type image: str
+        :type poster: str
+        :type thumb: str
+        :type fanart: str
         :type duration: int
         :type remaining: str
         :type geoblocked: bool
@@ -83,8 +84,9 @@ class Movie:
         self.name = name
         self.description = description if description else ''
         self.year = year
-        self.cover = cover
-        self.image = image
+        self.poster = poster
+        self.thumb = thumb
+        self.fanart = fanart
         self.duration = duration
         self.remaining = remaining
         self.geoblocked = geoblocked
@@ -101,14 +103,15 @@ class Movie:
 class Program:
     """ Defines a Program """
 
-    def __init__(self, program_id=None, name=None, description=None, cover=None, image=None, seasons=None,
+    def __init__(self, program_id=None, name=None, description=None, poster=None, thumb=None, fanart=None, seasons=None,
                  geoblocked=None, channel=None, legal=None, my_list=None, content_hash=None, available=True):
         """
         :type program_id: str
         :type name: str
         :type description: str
-        :type cover: str
-        :type image: str
+        :type poster: str
+        :type thumb: str
+        :type fanart: str
         :type seasons: dict[int, Season]
         :type geoblocked: bool
         :type channel: str
@@ -120,8 +123,9 @@ class Program:
         self.program_id = program_id
         self.name = name
         self.description = description if description else ''
-        self.cover = cover
-        self.image = image
+        self.poster = poster
+        self.thumb = thumb
+        self.fanart = fanart
         self.seasons = seasons if seasons else {}
         self.geoblocked = geoblocked
         self.channel = channel
@@ -137,19 +141,15 @@ class Program:
 class Season:
     """ Defines a Season """
 
-    def __init__(self, number=None, episodes=None, cover=None, geoblocked=None, channel=None, legal=None):
+    def __init__(self, number=None, episodes=None, channel=None, legal=None):
         """
         :type number: str
         :type episodes: dict[int, Episode]
-        :type cover: str
-        :type geoblocked: bool
         :type channel: str
         :type legal: str
         """
         self.number = int(number)
         self.episodes = episodes if episodes else {}
-        self.cover = cover
-        self.geoblocked = geoblocked
         self.channel = channel
         self.legal = legal
 
@@ -160,9 +160,9 @@ class Season:
 class Episode:
     """ Defines an Episode """
 
-    def __init__(self, episode_id=None, program_id=None, program_name=None, number=None, season=None, name=None,
-                 description=None, cover=None, duration=None, remaining=None, geoblocked=None, channel=None, legal=None,
-                 aired=None, progress=None, watched=False, next_episode=None, available=True):
+    def __init__(self, episode_id=None, program_id=None, program_name=None, number=None, season=None, name=None, description=None, poster=None, thumb=None,
+                 fanart=None, duration=None, remaining=None, geoblocked=None, channel=None, legal=None, aired=None, progress=None, watched=False,
+                 next_episode=None, available=True):
         """
         :type episode_id: str
         :type program_id: str
@@ -171,7 +171,9 @@ class Episode:
         :type season: str
         :type name: str
         :type description: str
-        :type cover: str
+        :type poster: str
+        :type thumb: str
+        :type fanart: str
         :type duration: int
         :type remaining: int
         :type geoblocked: bool
@@ -194,7 +196,9 @@ class Episode:
         else:
             self.name = name
         self.description = description if description else ''
-        self.cover = cover
+        self.poster = poster
+        self.thumb = thumb
+        self.fanart = fanart
         self.duration = int(duration) if duration else None
         self.remaining = int(remaining) if remaining is not None else None
         self.geoblocked = geoblocked

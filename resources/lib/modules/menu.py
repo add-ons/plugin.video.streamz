@@ -119,18 +119,18 @@ class Menu:
                 ),
             ))
 
-        # if kodiutils.get_setting_as_bool('interface_show_continuewatching') and kodiutils.has_credentials():
-        #     listing.append(TitleItem(
-        #         title=kodiutils.localize(30019),  # Continue watching
-        #         path=kodiutils.url_for('show_continuewatching'),
-        #         art_dict=dict(
-        #             icon='DefaultInProgressShows.png',
-        #             fanart=kodiutils.get_addon_info('fanart'),
-        #         ),
-        #         info_dict=dict(
-        #             plot=kodiutils.localize(30020),
-        #         ),
-        #     ))
+        if kodiutils.get_setting_bool('interface_show_continuewatching'):
+            listing.append(TitleItem(
+                title=kodiutils.localize(30019),  # Continue watching
+                path=kodiutils.url_for('show_continuewatching'),
+                art_dict=dict(
+                    icon='DefaultInProgressShows.png',
+                    fanart=kodiutils.get_addon_info('fanart'),
+                ),
+                info_dict=dict(
+                    plot=kodiutils.localize(30020),
+                ),
+            ))
 
         listing.append(TitleItem(
             title=kodiutils.localize(30009),  # Search
@@ -196,8 +196,10 @@ class Menu:
         :rtype TitleItem
         """
         art_dict = {
-            'thumb': item.cover,
-            'cover': item.cover,
+            'poster': item.poster,
+            'landscape': item.thumb,
+            'thumb': item.thumb,
+            'fanart': item.fanart,
         }
         info_dict = {
             'title': item.name,
@@ -224,9 +226,6 @@ class Menu:
                     kodiutils.url_for('mylist_add', video_type=CONTENT_TYPE_MOVIE, content_id=item.movie_id)
                 )]
 
-            art_dict.update({
-                'fanart': item.image,
-            })
             info_dict.update({
                 'mediatype': 'movie',
                 'duration': item.duration,
@@ -276,9 +275,6 @@ class Menu:
                     kodiutils.url_for('mylist_add', video_type=CONTENT_TYPE_PROGRAM, content_id=item.program_id)
                 )]
 
-            art_dict.update({
-                'fanart': item.image,
-            })
             info_dict.update({
                 'mediatype': 'tvshow',
                 'season': len(item.seasons),
@@ -308,9 +304,6 @@ class Menu:
                     kodiutils.url_for('show_catalog_program', program=item.program_id)
                 )]
 
-            art_dict.update({
-                'fanart': item.cover,
-            })
             info_dict.update({
                 'mediatype': 'episode',
                 'tvshowtitle': item.program_name,
