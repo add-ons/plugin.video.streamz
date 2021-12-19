@@ -8,9 +8,8 @@ from __future__ import absolute_import, division, unicode_literals
 import os
 import sys
 
-import xbmcaddon
-
-from resources.lib import kodilogging
+from resources.lib import kodilogging, kodiutils
+from resources.lib.streamz.auth import Auth
 
 try:  # Python 3
     from http.client import HTTPConnection
@@ -29,14 +28,7 @@ if sys.version_info[0] == 2:
 
 # Set credentials based on environment data
 # Use the .env file with Pipenv to make this work nicely during development
-ADDON = xbmcaddon.Addon()
-if os.environ.get('ADDON_LOGINPROVIDER'):
-    ADDON.setSetting('loginprovider', os.environ.get('ADDON_LOGINPROVIDER'))
-else:
-    ADDON.setSetting('loginprovider', '0')  # Streamz login
-if os.environ.get('ADDON_USERNAME'):
-    ADDON.setSetting('username', os.environ.get('ADDON_USERNAME'))
-if os.environ.get('ADDON_PASSWORD'):
-    ADDON.setSetting('password', os.environ.get('ADDON_PASSWORD'))
-if os.environ.get('ADDON_PROFILE'):
-    ADDON.setSetting('profile', os.environ.get('ADDON_PROFILE'))
+if os.environ.get('ADDON_TOKEN') and os.environ.get('ADDON_PROFILE'):
+    AUTH = Auth(kodiutils.get_tokens_path())
+    AUTH.set_token(os.environ.get('ADDON_TOKEN'))
+    AUTH.set_profile(*os.environ.get('ADDON_PROFILE').split(':'))

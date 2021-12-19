@@ -20,13 +20,9 @@ class Player:
 
     def __init__(self):
         """ Initialise object """
-        self._auth = Auth(kodiutils.get_setting('username'),
-                          kodiutils.get_setting('password'),
-                          kodiutils.get_setting('loginprovider'),
-                          kodiutils.get_setting('profile'),
-                          kodiutils.get_tokens_path())
-        self._api = Api(self._auth)
-        self._stream = Stream(self._auth)
+        auth = Auth(kodiutils.get_tokens_path())
+        self._api = Api(auth.get_tokens())
+        self._stream = Stream(auth.get_tokens())
 
     def play(self, category, item):
         """ Play the requested item.

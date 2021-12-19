@@ -22,7 +22,6 @@ EXAMPLE_PROGRAM = '6382e070-c284-4538-b60a-44f337ba6157'  # FC De Kampioenen
 EXAMPLE_EPISODE = '7c1c2b5c-de72-45d6-ab88-8dd63edddf43'  # FC De Kampioenen S01E01
 
 
-@unittest.skipUnless(kodiutils.get_setting('username') and kodiutils.get_setting('password'), 'Skipping since we have no credentials.')
 class TestRouting(unittest.TestCase):
     """ Tests for Routing """
 
@@ -37,9 +36,6 @@ class TestRouting(unittest.TestCase):
 
     def test_main_menu(self):
         routing.run([routing.url_for(addon.show_main_menu), '0', ''])
-
-    def test_catalog_menu(self):
-        routing.run([routing.url_for(addon.show_catalog_all), '0', ''])
 
     def test_catalog_program_menu(self):
         routing.run([routing.url_for(addon.show_catalog_program, program=EXAMPLE_PROGRAM), '0', ''])
@@ -77,20 +73,6 @@ class TestRouting(unittest.TestCase):
 
     def test_play_episode(self):
         routing.run([routing.url_for(addon.play, category='episodes', item=EXAMPLE_EPISODE), '0', ''])
-
-    def test_library(self):
-        routing.run([routing.url_for(addon.library_movies), '0', ''])
-        routing.run([routing.url_for(addon.library_movies), '0', 'movie=' + EXAMPLE_MOVIE + '&kodi_action=check_exists'])
-        routing.run([routing.url_for(addon.library_movies), '0', 'movie=' + EXAMPLE_MOVIE + '&kodi_action=refresh_info'])
-        routing.run([routing.url_for(addon.library_movies), '0', 'movie=' + EXAMPLE_MOVIE])
-        routing.run([routing.url_for(addon.library_tvshows), '0', ''])
-        routing.run([routing.url_for(addon.library_tvshows), '0', 'program=' + EXAMPLE_PROGRAM])
-        routing.run([routing.url_for(addon.library_tvshows), '0', 'program=' + EXAMPLE_PROGRAM + '&kodi_action=check_exists'])
-        routing.run([routing.url_for(addon.library_tvshows), '0', 'program=' + EXAMPLE_PROGRAM + '&kodi_action=refresh_info'])
-        routing.run([routing.url_for(addon.library_tvshows), '0', 'episode=' + EXAMPLE_EPISODE])
-        routing.run([routing.url_for(addon.library_configure), '0', ''])
-        routing.run([routing.url_for(addon.library_clean), '0', ''])
-        routing.run([routing.url_for(addon.library_update), '0', ''])
 
 
 if __name__ == '__main__':

@@ -21,29 +21,8 @@ class Catalog:
 
     def __init__(self):
         """ Initialise object """
-        self._auth = Auth(kodiutils.get_setting('username'),
-                          kodiutils.get_setting('password'),
-                          kodiutils.get_setting('loginprovider'),
-                          kodiutils.get_setting('profile'),
-                          kodiutils.get_tokens_path())
-        self._api = Api(self._auth)
-
-    def show_catalog_category(self, category=None):
-        """ Show a category in the catalog.
-
-        :type category: str
-        """
-        items = self._api.get_items(category)
-        show_unavailable = kodiutils.get_setting_bool('interface_show_unavailable')
-
-        listing = []
-        for item in items:
-            if show_unavailable or item.available:
-                listing.append(Menu.generate_titleitem(item))
-
-        # Sort items by label, but don't put folders at the top.
-        # Used for A-Z listing or when movies and episodes are mixed.
-        kodiutils.show_listing(listing, 30003, content='files', sort=['label', 'year', 'duration'])
+        auth = Auth(kodiutils.get_tokens_path())
+        self._api = Api(auth.get_tokens())
 
     def show_program(self, program):
         """ Show a program from the catalog.
@@ -194,7 +173,7 @@ class Catalog:
 
     def show_mylist(self):
         """ Show the items in "My List". """
-        mylist = self._api.get_mylist('my-list')
+        mylist = self._api.get_mylist()
 
         listing = []
         for item in mylist:

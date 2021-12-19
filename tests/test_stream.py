@@ -11,33 +11,28 @@ import unittest
 import xbmc
 
 from resources.lib import kodiutils
-from resources.lib.streamz import Movie
+from resources.lib.streamz import STOREFRONT_MOVIES, Movie
 from resources.lib.streamz.api import Api
 from resources.lib.streamz.auth import Auth
-from resources.lib.streamz.stream import Stream, ResolvedStream
+from resources.lib.streamz.stream import ResolvedStream, Stream
 
 _LOGGER = logging.getLogger(__name__)
 
 
-@unittest.skipUnless(kodiutils.get_setting('username') and kodiutils.get_setting('password'), 'Skipping since we have no credentials.')
 class TestStream(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.auth = Auth(kodiutils.get_setting('username'),
-                        kodiutils.get_setting('password'),
-                        kodiutils.get_setting('loginprovider'),
-                        kodiutils.get_setting('profile'),
-                        kodiutils.get_tokens_path())
-        cls.api = Api(cls.auth)
-        cls.stream = Stream(cls.auth)
+        auth = Auth(kodiutils.get_tokens_path())
+        cls.api = Api(auth.get_tokens())
+        cls.stream = Stream(auth.get_tokens())
 
     def tearDown(self):
         xbmc.Player().stop()
 
     def test_stream(self):
         # Find the first movie from the catalog
-        items = self.api.get_items()
+        items = self.api.get_storefront(STOREFRONT_MOVIES)
         movie = next(item for item in items if isinstance(item, Movie) if item.available)
         _LOGGER.info('Playing %s', movie)
 

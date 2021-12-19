@@ -7,7 +7,8 @@ import logging
 
 from resources.lib import kodiutils
 from resources.lib.kodiutils import TitleItem
-from resources.lib.streamz import STOREFRONT_KIDS, STOREFRONT_MAIN, STOREFRONT_MAIN_KIDS, STOREFRONT_MOVIES, STOREFRONT_SERIES, Episode, Movie, Program
+from resources.lib.streamz import (PRODUCT_STREAMZ, PRODUCT_STREAMZ_KIDS, STOREFRONT_KIDS, STOREFRONT_MAIN, STOREFRONT_MAIN_KIDS, STOREFRONT_MOVIES,
+                                   STOREFRONT_SERIES, Episode, Movie, Program)
 from resources.lib.streamz.api import CONTENT_TYPE_MOVIE, CONTENT_TYPE_PROGRAM
 from resources.lib.streamz.auth import Auth
 
@@ -19,11 +20,7 @@ class Menu:
 
     def __init__(self):
         """ Initialise object """
-        self._auth = Auth(kodiutils.get_setting('username'),
-                          kodiutils.get_setting('password'),
-                          kodiutils.get_setting('loginprovider'),
-                          kodiutils.get_setting('profile'),
-                          kodiutils.get_tokens_path())
+        self._auth = Auth(kodiutils.get_tokens_path())
 
     def show_mainmenu(self):
         """ Show the main menu. """
@@ -31,7 +28,7 @@ class Menu:
 
         account = self._auth.get_tokens()
 
-        if account.product == 'STREAMZ':
+        if account.product == PRODUCT_STREAMZ:
             listing.append(TitleItem(
                 title=kodiutils.localize(30015),  # Recommendations
                 path=kodiutils.url_for('show_recommendations', storefront=STOREFRONT_MAIN),
@@ -80,7 +77,7 @@ class Menu:
                 ),
             ))
 
-        elif account.product == 'STREAMZ_KIDS':
+        elif account.product == PRODUCT_STREAMZ_KIDS:
             listing.append(TitleItem(
                 title=kodiutils.localize(30015),  # Recommendations
                 path=kodiutils.url_for('show_recommendations', storefront=STOREFRONT_MAIN_KIDS),
@@ -92,20 +89,6 @@ class Menu:
                     plot=kodiutils.localize(30016),
                 ),
             ))
-
-        if kodiutils.get_setting_bool('interface_show_az'):
-            listing.append(TitleItem(
-                title=kodiutils.localize(30001),  # A-Z
-                path=kodiutils.url_for('show_catalog_all'),
-                art_dict=dict(
-                    icon='DefaultMovieTitle.png',
-                    fanart=kodiutils.get_addon_info('fanart'),
-                ),
-                info_dict=dict(
-                    plot=kodiutils.localize(30002),
-                ),
-            ))
-
         if kodiutils.get_setting_bool('interface_show_mylist'):
             listing.append(TitleItem(
                 title=kodiutils.localize(30017),  # My List
@@ -278,9 +261,6 @@ class Menu:
             info_dict.update({
                 'mediatype': 'tvshow',
                 'season': len(item.seasons),
-            })
-            prop_dict.update({
-                'hash': item.content_hash,
             })
 
             return TitleItem(

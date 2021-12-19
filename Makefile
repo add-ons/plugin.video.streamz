@@ -30,9 +30,9 @@ check-pylint:
 check-translations:
 	@printf ">>> Running translation checks\n"
 	@$(foreach lang,$(languages), \
-		msgcmp resources/language/resource.language.$(lang)/strings.po resources/language/resource.language.en_gb/strings.po; \
+		msgcmp --use-untranslated resources/language/resource.language.$(lang)/strings.po resources/language/resource.language.en_gb/strings.po; \
 	)
-	@tests/check_for_unused_translations.py
+	@scripts/check_for_unused_translations.py
 
 check-addon: clean build
 	@printf ">>> Running addon checks\n"
@@ -48,7 +48,7 @@ test: test-unit
 
 test-unit:
 	@printf ">>> Running unit tests\n"
-	@$(PYTHON) -m pytest tests
+	@$(PYTHON) -m pytest -v tests
 
 clean:
 	@printf ">>> Cleaning up\n"
@@ -65,7 +65,7 @@ build: clean
 
 release:
 ifneq ($(release),)
-	@github_changelog_generator -u add-ons -p $(name) --no-issues --future-release v$(release);
+	docker run -it --rm -e CHANGELOG_GITHUB_TOKEN -v "$(shell pwd)":/usr/local/src/your-app githubchangeloggenerator/github-changelog-generator -u add-ons -p $(name) --no-issues --future-release v$(release)
 
 	@printf "cd /addon/@version\nset $$release\nsave\nbye\n" | xmllint --shell addon.xml; \
 	date=$(shell date '+%Y-%m-%d'); \
