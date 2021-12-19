@@ -11,7 +11,6 @@ STOREFRONT_MAIN = 'eba52f64-92da-4fec-804b-278ebafc75fd'
 STOREFRONT_MOVIES = '4f163159-15c3-452c-b275-1747b144cfa0'
 STOREFRONT_SERIES = 'dba19d15-1ddf-49ef-8eb5-99c59a1fb377'
 STOREFRONT_KIDS = 'a53d1ec3-ab43-4942-9d31-4f4754b4f519'
-STOREFRONT_MAIN_KIDS = 'e0c175c0-a43c-4eed-bdca-e1e95a726bc0'
 
 STOREFRONT_PAGE_CONTINUE_WATCHING = '874707b2-64a2-4846-90a9-a3514893593d'
 
@@ -104,7 +103,7 @@ class Program:
     """ Defines a Program """
 
     def __init__(self, program_id=None, name=None, description=None, poster=None, thumb=None, fanart=None, seasons=None,
-                 geoblocked=None, channel=None, legal=None, my_list=None, content_hash=None, available=True):
+                 geoblocked=None, channel=None, legal=None, my_list=None, available=True):
         """
         :type program_id: str
         :type name: str
@@ -117,7 +116,6 @@ class Program:
         :type channel: str
         :type legal: str
         :type my_list: bool
-        :type content_hash: str
         :type available: bool
         """
         self.program_id = program_id
@@ -131,7 +129,6 @@ class Program:
         self.channel = channel
         self.legal = legal
         self.my_list = my_list
-        self.content_hash = content_hash
         self.available = available
 
     def __repr__(self):

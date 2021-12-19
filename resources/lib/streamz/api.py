@@ -3,7 +3,6 @@
 
 from __future__ import absolute_import, division, unicode_literals
 
-import hashlib
 import json
 import logging
 
@@ -29,10 +28,11 @@ CONTENT_TYPE_EPISODE = 'EPISODE'
 class Api:
     """ Streamz API """
 
-    def __init__(self, auth):
-        """ Initialise object """
-        self._auth = auth
-        self._tokens = self._auth.get_tokens()
+    def __init__(self, tokens):
+        """ Initialise object
+        :param resources.lib.vtmgo.vtmgoauth.AccountStorage token:       An authenticated token.
+        """
+        self._tokens = tokens
 
     def _mode(self):
         """ Return the mode that should be used for API calls. """
@@ -40,7 +40,7 @@ class Api:
 
     def get_config(self):
         """ Returns the config for the app. """
-        response = util.http_get(API_ANDROID_ENDPOINT + '/streamz/config', token=self._tokens.jwt_token)
+        response = util.http_get(API_ANDROID_ENDPOINT + '/streamz/config', token=self._tokens.access_token)
         info = json.loads(response.text)
 
         # This contains a player.updateIntervalSeconds that could be used to notify Streamz about the playing progress
@@ -53,7 +53,7 @@ class Api:
          :rtype: list[Category|Program|Movie]
          """
         response = util.http_get(API_ENDPOINT + '/%s/storefronts/%s' % (self._mode(), storefront),
-                                 token=self._tokens.jwt_token,
+                                 token=self._tokens.access_token,
                                  profile=self._tokens.profile)
         result = json.loads(response.text)
 
@@ -96,7 +96,7 @@ class Api:
          :rtype: Category
          """
         response = util.http_get(API_ENDPOINT + '/%s/storefronts/%s/detail/%s' % (self._mode(), storefront, category),
-                                 token=self._tokens.jwt_token,
+                                 token=self._tokens.access_token,
                                  profile=self._tokens.profile)
         result = json.loads(response.text)
 
@@ -116,7 +116,7 @@ class Api:
     def get_mylist(self, content_filter=None, cache=CACHE_ONLY):
         """ Returns the contents of My List """
         response = util.http_get(API_ENDPOINT + '/%s/my-list' % (self._mode()),
-                                 token=self._tokens.jwt_token,
+                                 token=self._tokens.access_token,
                                  profile=self._tokens.profile)
 
         # Result can be empty
@@ -141,42 +141,16 @@ class Api:
     def add_mylist(self, video_type, content_id):
         """ Add an item to My List. """
         util.http_put(API_ENDPOINT + '/%s/userData/myList/%s/%s' % (self._mode(), video_type, content_id),
-                      token=self._tokens.jwt_token,
+                      token=self._tokens.access_token,
                       profile=self._tokens.profile)
         kodiutils.set_cache(['swimlane', 'my-list'], None)
 
     def del_mylist(self, video_type, content_id):
         """ Delete an item from My List. """
         util.http_delete(API_ENDPOINT + '/%s/userData/myList/%s/%s' % (self._mode(), video_type, content_id),
-                         token=self._tokens.jwt_token,
+                         token=self._tokens.access_token,
                          profile=self._tokens.profile)
         kodiutils.set_cache(['swimlane', 'my-list'], None)
-
-    def get_items(self, category=None, content_filter=None, cache=CACHE_ONLY):
-        """ Get a list of all the items in a category.
-
-        :type category: str
-        :type content_filter: class
-        :type cache: int
-        :rtype list[resources.lib.streamz.Movie | resources.lib.streamz.Program]
-        """
-        # Fetch from API
-        response = util.http_get(API_ENDPOINT + '/%s/catalog' % self._mode(),
-                                 params={'pageSize': 2000, 'filter': quote(category) if category else None},
-                                 token=self._tokens.jwt_token,
-                                 profile=self._tokens.profile)
-        info = json.loads(response.text)
-        content = info.get('pagedTeasers', {}).get('content', [])
-
-        items = []
-        for item in content:
-            if item.get('target', {}).get('type') == CONTENT_TYPE_MOVIE and content_filter in [None, Movie]:
-                items.append(self._parse_movie_teaser(item, cache=cache))
-
-            elif item.get('target', {}).get('type') == CONTENT_TYPE_PROGRAM and content_filter in [None, Program]:
-                items.append(self._parse_program_teaser(item, cache=cache))
-
-        return items
 
     def get_movie(self, movie_id, cache=CACHE_AUTO):
         """ Get the details of the specified movie.
@@ -196,7 +170,7 @@ class Api:
         if movie is None:
             # Fetch from API
             response = util.http_get(API_ENDPOINT + '/%s/movies/%s' % (self._mode(), movie_id),
-                                     token=self._tokens.jwt_token,
+                                     token=self._tokens.access_token,
                                      profile=self._tokens.profile)
             info = json.loads(response.text)
             movie = info.get('movie', {})
@@ -237,17 +211,13 @@ class Api:
         if program is None:
             # Fetch from API
             response = util.http_get(API_ENDPOINT + '/%s/programs/%s' % (self._mode(), program_id),
-                                     token=self._tokens.jwt_token,
+                                     token=self._tokens.access_token,
                                      profile=self._tokens.profile)
             info = json.loads(response.text)
             program = info.get('program', {})
             kodiutils.set_cache(['program', program_id], program)
 
         channel = self._parse_channel(program.get('channelLogoUrl'))
-
-        # Calculate a hash value of the ids of all episodes
-        program_hash = hashlib.md5()
-        program_hash.update(program.get('id').encode())
 
         seasons = {}
         for item_season in program.get('seasons', []):
@@ -274,7 +244,6 @@ class Api:
                     watched=item_episode.get('doneWatching', False),
                     available=item_episode.get('blockedFor') != 'SUBSCRIPTION',
                 )
-                program_hash.update(item_episode.get('id').encode())
 
             seasons[item_season.get('index')] = Season(
                 number=item_season.get('index'),
@@ -293,7 +262,6 @@ class Api:
             seasons=seasons,
             channel=channel,
             legal=program.get('legalIcons'),
-            content_hash=program_hash.hexdigest().upper(),
             # my_list=program.get('addedToMyList'),  # Don't use addedToMyList, since we might have cached this info
             available=program.get('blockedFor') != 'SUBSCRIPTION',
         )
@@ -342,7 +310,7 @@ class Api:
         :rtype Episode
         """
         response = util.http_get(API_ENDPOINT + '/%s/play/episodes/%s' % (self._mode(), episode_id),
-                                 token=self._tokens.jwt_token,
+                                 token=self._tokens.access_token,
                                  profile=self._tokens.profile)
         episode = json.loads(response.text)
 
@@ -367,45 +335,6 @@ class Api:
             next_episode=next_episode,
         )
 
-    def get_mylist_ids(self):
-        """ Returns the IDs of the contents of My List """
-        # Try to fetch from cache
-        items = kodiutils.get_cache(['mylist_id'], 300)  # 5 minutes ttl
-        if items:
-            return items
-
-        # Fetch from API
-        response = util.http_get(API_ENDPOINT + '/%s/my-list' % (self._mode()),
-                                 token=self._tokens.jwt_token,
-                                 profile=self._tokens.profile)
-
-        # Result can be empty
-        result = json.loads(response.text) if response.text else []
-
-        items = [item.get('target', {}).get('id') for item in result.get('teasers', [])]
-
-        kodiutils.set_cache(['mylist_id'], items)
-        return items
-
-    def get_catalog_ids(self):
-        """ Returns the IDs of the contents of the Catalog """
-        # Try to fetch from cache
-        items = kodiutils.get_cache(['catalog_id'], 300)  # 5 minutes ttl
-        if items:
-            return items
-
-        # Fetch from API
-        response = util.http_get(API_ENDPOINT + '/%s/catalog' % self._mode(),
-                                 params={'pageSize': 2000, 'filter': None},
-                                 token=self._tokens.jwt_token,
-                                 profile=self._tokens.profile)
-        info = json.loads(response.text)
-
-        items = [item.get('target', {}).get('id') for item in info.get('pagedTeasers', {}).get('content', [])]
-
-        kodiutils.set_cache(['catalog_id'], items)
-        return items
-
     def do_search(self, search):
         """ Do a search in the full catalog.
         :type search: str
@@ -413,7 +342,7 @@ class Api:
         """
         response = util.http_get(API_ENDPOINT + '/%s/search/?query=%s' % (self._mode(),
                                                                           kodiutils.to_unicode(quote(kodiutils.from_unicode(search)))),
-                                 token=self._tokens.jwt_token,
+                                 token=self._tokens.access_token,
                                  profile=self._tokens.profile)
         results = json.loads(response.text)
 

@@ -18,10 +18,9 @@ class Stream:
 
     _API_KEY = 'zs06SrhsKN2fEQvDdTMDR2t6wYwfceQu5HAmGa0p'
 
-    def __init__(self, auth):
+    def __init__(self, tokens=None):
         """ Initialise object """
-        self._auth = auth
-        self._tokens = self._auth.get_tokens()
+        self._tokens = tokens
 
     def _mode(self):
         """ Return the mode that should be used for API calls """
@@ -94,7 +93,7 @@ class Stream:
             raise Exception('Unknown stream type: %s' % strtype)
 
         _LOGGER.debug('Getting stream tokens from %s', url)
-        response = util.http_get(url, token=self._tokens.jwt_token, profile=self._tokens.profile)
+        response = util.http_get(url, token=self._tokens.access_token, profile=self._tokens.profile)
 
         return json.loads(response.text)
 

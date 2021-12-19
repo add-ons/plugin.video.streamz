@@ -20,20 +20,12 @@ class TestApi(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.auth = Auth(kodiutils.get_setting('username'),
-                        kodiutils.get_setting('password'),
-                        kodiutils.get_setting('loginprovider'),
-                        kodiutils.get_setting('profile'),
-                        kodiutils.get_tokens_path())
-        cls.api = Api(cls.auth)
+        auth = Auth(kodiutils.get_tokens_path())
+        cls.api = Api(auth.get_tokens())
 
     def test_get_config(self):
         config = self.api.get_config()
         self.assertTrue(config)
-
-    def test_catalog(self):
-        items = self.api.get_items()
-        self.assertTrue(items)
 
     def test_recommendations(self):
         main_recommendations = self.api.get_storefront(STOREFRONT_MAIN)
@@ -57,14 +49,6 @@ class TestApi(unittest.TestCase):
         results = self.api.do_search('huis')
         self.assertIsInstance(results, list)
 
-    def test_mylist_ids(self):
-        mylist = self.api.get_mylist_ids()
-        self.assertIsInstance(mylist, list)
-
-    def test_catalog_ids(self):
-        mylist = self.api.get_catalog_ids()
-        self.assertIsInstance(mylist, list)
-
     def test_errors(self):
         with self.assertRaises(UnavailableException):
             self.api.get_movie('0')
@@ -74,9 +58,6 @@ class TestApi(unittest.TestCase):
 
         with self.assertRaises(UnavailableException):
             self.api.get_episode('0')
-
-        with self.assertRaises(UnavailableException):
-            self.api.get_items('movies')
 
 
 if __name__ == '__main__':
