@@ -28,6 +28,7 @@ if sys.version_info[0] == 2:
 
 # Set credentials based on environment data
 # Use the .env file with Pipenv to make this work nicely during development
-if os.environ.get('ADDON_TOKEN'):
+if os.environ.get('ADDON_TOKEN') and os.environ.get('ADDON_PROFILE'):
     AUTH = Auth(kodiutils.get_tokens_path())
     AUTH.set_token(os.environ.get('ADDON_TOKEN'))
+    AUTH.set_profile(*os.environ.get('ADDON_PROFILE').split(':'))
