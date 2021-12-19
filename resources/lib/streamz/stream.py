@@ -169,7 +169,7 @@ class Stream:
         :returns: A list of subtitles.
         :rtype: list[dict]
         """
-        subtitles = list()
+        subtitles = []
         if stream_info.get('video').get('subtitles'):
             for _, subtitle in enumerate(stream_info.get('video').get('subtitles')):
                 name = subtitle.get('language')
@@ -177,7 +177,8 @@ class Stream:
                     name = 'nl.default'
                 elif name == 'nl-tt':
                     name = 'nl.T888'
-                subtitles.append(dict(name=name, url=subtitle.get('url')))
+                subtitles.append({'name': name,
+                                  'url': subtitle.get('url')})
                 _LOGGER.debug('Found subtitle url %s', subtitle.get('url'))
         return subtitles
 
@@ -197,7 +198,7 @@ class Stream:
         if not kodiutils.exists(temp_dir):
             kodiutils.mkdirs(temp_dir)
 
-        downloaded_subtitles = list()
+        downloaded_subtitles = []
         for subtitle in subtitles:
             output_file = temp_dir + subtitle.get('name')
             webvtt_content = util.http_get(subtitle.get('url')).text
