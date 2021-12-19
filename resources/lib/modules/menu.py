@@ -7,8 +7,10 @@ import logging
 
 from resources.lib import kodiutils
 from resources.lib.kodiutils import TitleItem
-from resources.lib.streamz import STOREFRONT_KIDS, STOREFRONT_MAIN, STOREFRONT_MOVIES, STOREFRONT_SERIES, Episode, Movie, Program
+from resources.lib.streamz import (PRODUCT_STREAMZ, PRODUCT_STREAMZ_KIDS, STOREFRONT_KIDS, STOREFRONT_MAIN, STOREFRONT_MAIN_KIDS, STOREFRONT_MOVIES,
+                                   STOREFRONT_SERIES, Episode, Movie, Program)
 from resources.lib.streamz.api import CONTENT_TYPE_MOVIE, CONTENT_TYPE_PROGRAM
+from resources.lib.streamz.auth import Auth
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -16,59 +18,77 @@ _LOGGER = logging.getLogger(__name__)
 class Menu:
     """ Menu code """
 
-    @staticmethod
-    def show_mainmenu():
+    def __init__(self):
+        """ Initialise object """
+        self._auth = Auth(kodiutils.get_tokens_path())
+
+    def show_mainmenu(self):
         """ Show the main menu. """
         listing = []
 
-        listing.append(TitleItem(
-            title=kodiutils.localize(30015),  # Recommendations
-            path=kodiutils.url_for('show_recommendations', storefront=STOREFRONT_MAIN),
-            art_dict=dict(
-                icon='DefaultFavourites.png',
-                fanart=kodiutils.get_addon_info('fanart'),
-            ),
-            info_dict=dict(
-                plot=kodiutils.localize(30016),
-            ),
-        ))
+        account = self._auth.get_tokens()
 
-        listing.append(TitleItem(
-            title=kodiutils.localize(30003),  # Movies
-            path=kodiutils.url_for('show_recommendations', storefront=STOREFRONT_MOVIES),
-            art_dict=dict(
-                icon='DefaultMovies.png',
-                fanart=kodiutils.get_addon_info('fanart'),
-            ),
-            info_dict=dict(
-                plot=kodiutils.localize(30004),
-            ),
-        ))
+        if account.product == PRODUCT_STREAMZ:
+            listing.append(TitleItem(
+                title=kodiutils.localize(30015),  # Recommendations
+                path=kodiutils.url_for('show_recommendations', storefront=STOREFRONT_MAIN),
+                art_dict=dict(
+                    icon='DefaultFavourites.png',
+                    fanart=kodiutils.get_addon_info('fanart'),
+                ),
+                info_dict=dict(
+                    plot=kodiutils.localize(30016),
+                ),
+            ))
 
-        listing.append(TitleItem(
-            title=kodiutils.localize(30005),  # Series
-            path=kodiutils.url_for('show_recommendations', storefront=STOREFRONT_SERIES),
-            art_dict=dict(
-                icon='DefaultTVShows.png',
-                fanart=kodiutils.get_addon_info('fanart'),
-            ),
-            info_dict=dict(
-                plot=kodiutils.localize(30006),
-            ),
-        ))
+            listing.append(TitleItem(
+                title=kodiutils.localize(30003),  # Movies
+                path=kodiutils.url_for('show_recommendations', storefront=STOREFRONT_MOVIES),
+                art_dict=dict(
+                    icon='DefaultMovies.png',
+                    fanart=kodiutils.get_addon_info('fanart'),
+                ),
+                info_dict=dict(
+                    plot=kodiutils.localize(30004),
+                ),
+            ))
 
-        listing.append(TitleItem(
-            title=kodiutils.localize(30021),  # Kids
-            path=kodiutils.url_for('show_recommendations', storefront=STOREFRONT_KIDS),
-            art_dict=dict(
-                icon='DefaultFavourites.png',
-                fanart=kodiutils.get_addon_info('fanart'),
-            ),
-            info_dict=dict(
-                plot=kodiutils.localize(30022),
-            ),
-        ))
+            listing.append(TitleItem(
+                title=kodiutils.localize(30005),  # Series
+                path=kodiutils.url_for('show_recommendations', storefront=STOREFRONT_SERIES),
+                art_dict=dict(
+                    icon='DefaultTVShows.png',
+                    fanart=kodiutils.get_addon_info('fanart'),
+                ),
+                info_dict=dict(
+                    plot=kodiutils.localize(30006),
+                ),
+            ))
 
+            listing.append(TitleItem(
+                title=kodiutils.localize(30021),  # Kids
+                path=kodiutils.url_for('show_recommendations', storefront=STOREFRONT_KIDS),
+                art_dict=dict(
+                    icon='DefaultFavourites.png',
+                    fanart=kodiutils.get_addon_info('fanart'),
+                ),
+                info_dict=dict(
+                    plot=kodiutils.localize(30022),
+                ),
+            ))
+
+        elif account.product == PRODUCT_STREAMZ_KIDS:
+            listing.append(TitleItem(
+                title=kodiutils.localize(30015),  # Recommendations
+                path=kodiutils.url_for('show_recommendations', storefront=STOREFRONT_MAIN_KIDS),
+                art_dict=dict(
+                    icon='DefaultFavourites.png',
+                    fanart=kodiutils.get_addon_info('fanart'),
+                ),
+                info_dict=dict(
+                    plot=kodiutils.localize(30016),
+                ),
+            ))
         if kodiutils.get_setting_bool('interface_show_mylist'):
             listing.append(TitleItem(
                 title=kodiutils.localize(30017),  # My List

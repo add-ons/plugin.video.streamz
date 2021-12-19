@@ -173,7 +173,7 @@ class Catalog:
 
     def show_mylist(self):
         """ Show the items in "My List". """
-        mylist = self._api.get_mylist('my-list')
+        mylist = self._api.get_mylist()
 
         listing = []
         for item in mylist:

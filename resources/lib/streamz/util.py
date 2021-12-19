@@ -10,7 +10,7 @@ from requests import HTTPError
 from requests.adapters import BaseAdapter
 
 from resources.lib import kodiutils
-from resources.lib.streamz.exceptions import InvalidLoginException, InvalidTokenException, LimitReachedException, UnavailableException
+from resources.lib.streamz.exceptions import InvalidTokenException, LimitReachedException, UnavailableException
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -58,8 +58,6 @@ def http_get(url, params=None, token=None, profile=None, headers=None):
     except HTTPError as exc:
         if exc.response.status_code == 401:
             raise InvalidTokenException(exc)
-        if exc.response.status_code == 403:
-            raise InvalidLoginException(exc)
         if exc.response.status_code == 404:
             raise UnavailableException(exc)
         if exc.response.status_code == 429:
@@ -86,8 +84,6 @@ def http_post(url, params=None, form=None, data=None, token=None, profile=None, 
     except HTTPError as exc:
         if exc.response.status_code == 401:
             raise InvalidTokenException(exc)
-        if exc.response.status_code == 403:
-            raise InvalidLoginException(exc)
         if exc.response.status_code == 404:
             raise UnavailableException(exc)
         if exc.response.status_code == 429:
@@ -114,8 +110,6 @@ def http_put(url, params=None, form=None, data=None, token=None, profile=None, h
     except HTTPError as exc:
         if exc.response.status_code == 401:
             raise InvalidTokenException(exc)
-        if exc.response.status_code == 403:
-            raise InvalidLoginException(exc)
         if exc.response.status_code == 404:
             raise UnavailableException(exc)
         raise
@@ -138,8 +132,6 @@ def http_delete(url, params=None, token=None, profile=None, headers=None):
     except HTTPError as exc:
         if exc.response.status_code == 401:
             raise InvalidTokenException(exc)
-        if exc.response.status_code == 403:
-            raise InvalidLoginException(exc)
         if exc.response.status_code == 404:
             raise UnavailableException(exc)
         raise

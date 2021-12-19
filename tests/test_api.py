@@ -8,13 +8,12 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import unittest
 
 from resources.lib import kodiutils
-from resources.lib.streamz import STOREFRONT_MAIN, STOREFRONT_MOVIES, STOREFRONT_SERIES, STOREFRONT_PAGE_CONTINUE_WATCHING
+from resources.lib.streamz import STOREFRONT_MAIN, STOREFRONT_MOVIES, STOREFRONT_PAGE_CONTINUE_WATCHING, STOREFRONT_SERIES
 from resources.lib.streamz.api import Api
 from resources.lib.streamz.auth import Auth
 from resources.lib.streamz.exceptions import UnavailableException
 
 
-@unittest.skipUnless(kodiutils.get_setting('username') and kodiutils.get_setting('password'), 'Skipping since we have no credentials.')
 class TestApi(unittest.TestCase):
     """ Tests for Streamz API """
 

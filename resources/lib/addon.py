@@ -19,8 +19,10 @@ _LOGGER = logging.getLogger(__name__)
 def index():
     """ Show the profile selection, or go to the main menu. """
     auth = Auth(kodiutils.get_tokens_path())
-    if auth.get_tokens():
-        show_main_menu()
+    tokens = auth.get_tokens()
+
+    if tokens:
+        select_profile()
     else:
         show_login_menu()
 
@@ -32,11 +34,26 @@ def show_main_menu():
     Menu().show_mainmenu()
 
 
+@routing.route('/select-profile')
+@routing.route('/select-profile/<key>')
+def select_profile(key=None):
+    """ Select your profile """
+    from resources.lib.modules.authentication import Authentication
+    Authentication().select_profile(key)
+
+
 @routing.route('/auth/login')
 def show_login_menu():
     """ Show the login menu """
     from resources.lib.modules.authentication import Authentication
     Authentication().login()
+
+
+@routing.route('/auth/clear-tokens')
+def auth_clear_tokens():
+    """ Clear the authentication tokens """
+    from resources.lib.modules.authentication import Authentication
+    Authentication().clear_tokens()
 
 
 @routing.route('/catalog/program/<program>')

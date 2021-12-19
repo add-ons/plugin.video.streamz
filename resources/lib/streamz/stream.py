@@ -8,7 +8,7 @@ import logging
 import os
 
 from resources.lib import kodiutils
-from resources.lib.streamz import API_ENDPOINT, ResolvedStream, util
+from resources.lib.streamz import API_ENDPOINT, PRODUCT_STREAMZ_KIDS, ResolvedStream, util
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -24,7 +24,7 @@ class Stream:
 
     def _mode(self):
         """ Return the mode that should be used for API calls """
-        return 'streamz-kids' if self._tokens.product == 'STREAMZ_KIDS' else 'streamz'
+        return 'streamz-kids' if self._tokens.product == PRODUCT_STREAMZ_KIDS else 'streamz'
 
     def get_stream(self, stream_type, stream_id):
         """ Return a ResolvedStream based on the stream type and id.

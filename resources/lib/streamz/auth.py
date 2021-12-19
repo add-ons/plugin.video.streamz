@@ -11,7 +11,7 @@ import uuid
 from requests import HTTPError
 
 from resources.lib.streamz import API_ENDPOINT, Profile, util
-from resources.lib.streamz.exceptions import (NoLoginException)
+from resources.lib.streamz.exceptions import NoLoginException
 
 try:  # Python 3
     import jwt
@@ -81,10 +81,17 @@ class Auth:
         self._account.access_token = access_token
         self._save_cache()
 
+    def set_profile(self, profile, product):
+        """ Sets an auth profile """
+        self._account.profile = profile
+        self._account.product = product
+        self._save_cache()
+
     def authorize(self):
         """ Start the authorization flow. """
-        response = util.http_post('https://login.streamz.be/device/authorize', form={
-            'client_id': 'streamz-androidtv',
+        response = util.http_post('https://login.streamz.be/oauth/device/code', form={
+            'client_id': self.CLIENT_ID,
+            'scope': 'openid',
         })
         auth_info = json.loads(response.text)
 
@@ -100,19 +107,19 @@ class Auth:
             raise NoLoginException
 
         try:
-            response = util.http_post('https://login.streamz.be/token', form={
+            response = util.http_post('https://login.streamz.be/oauth/token', form={
                 'device_code': self._account.device_code,
-                'client_id': 'vtm-go-androidtv',
+                'client_id': self.CLIENT_ID,
                 'grant_type': 'urn:ietf:params:oauth:grant-type:device_code',
             })
         except HTTPError as exc:
-            if exc.response.status_code == 400:
+            if exc.response.status_code == 403:
                 return False
             raise
 
         # Store these tokens
         auth_info = json.loads(response.text)
-        self._account.id_token = auth_info.get('access_token')
+        self._account.id_token = auth_info.get('id_token')
         self._account.refresh_token = auth_info.get('refresh_token')
 
         # Fetch an actual token we can use

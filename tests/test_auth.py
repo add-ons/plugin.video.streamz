@@ -14,7 +14,6 @@ from resources.lib.streamz.auth import Auth
 _LOGGER = logging.getLogger(__name__)
 
 
-@unittest.skipUnless(kodiutils.get_setting('username') and kodiutils.get_setting('password'), 'Skipping since we have no credentials.')
 class TestAuth(unittest.TestCase):
 
     def test_authorization(self):

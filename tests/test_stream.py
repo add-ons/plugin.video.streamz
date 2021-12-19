@@ -11,15 +11,14 @@ import unittest
 import xbmc
 
 from resources.lib import kodiutils
-from resources.lib.streamz import Movie, STOREFRONT_MOVIES
+from resources.lib.streamz import STOREFRONT_MOVIES, Movie
 from resources.lib.streamz.api import Api
 from resources.lib.streamz.auth import Auth
-from resources.lib.streamz.stream import Stream, ResolvedStream
+from resources.lib.streamz.stream import ResolvedStream, Stream
 
 _LOGGER = logging.getLogger(__name__)
 
 
-@unittest.skipUnless(kodiutils.get_setting('username') and kodiutils.get_setting('password'), 'Skipping since we have no credentials.')
 class TestStream(unittest.TestCase):
 
     @classmethod

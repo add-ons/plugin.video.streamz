@@ -7,7 +7,7 @@ import json
 import logging
 
 from resources.lib import kodiutils
-from resources.lib.streamz import API_ANDROID_ENDPOINT, API_ENDPOINT, Category, Episode, Movie, Program, Season, util
+from resources.lib.streamz import API_ANDROID_ENDPOINT, API_ENDPOINT, PRODUCT_STREAMZ_KIDS, Category, Episode, Movie, Program, Season, util
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -36,7 +36,7 @@ class Api:
 
     def _mode(self):
         """ Return the mode that should be used for API calls. """
-        return 'streamz-kids' if self._tokens.product == 'STREAMZ_KIDS' else 'streamz'
+        return 'streamz-kids' if self._tokens.product == PRODUCT_STREAMZ_KIDS else 'streamz'
 
     def get_config(self):
         """ Returns the config for the app. """
@@ -357,7 +357,7 @@ class Api:
         return items
 
     def _parse_movie_teaser(self, item, cache=CACHE_ONLY):
-        """ Parse the movie json and return an Movie instance.
+        """ Parse the movie json and return a Movie instance.
         :type item: dict
         :type cache: int
         :rtype Movie
@@ -376,7 +376,7 @@ class Api:
         )
 
     def _parse_program_teaser(self, item, cache=CACHE_ONLY):
-        """ Parse the program json and return an Program instance.
+        """ Parse the program json and return a Program instance.
         :type item: dict
         :type cache: int
         :rtype Program
