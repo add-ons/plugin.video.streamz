@@ -133,6 +133,10 @@ msgctxt "#30704"
 msgid "Your account has no profiles defined. Please login on www.streamz.be and create a profile."
 msgstr ""
 
+msgctxt "#30706"
+msgid "The authentication tokens are removed."
+msgstr ""
+
 msgctxt "#30708"
 msgid "Please restart Kodi."
 msgstr ""
