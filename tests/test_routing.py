@@ -47,7 +47,7 @@ class TestRouting(unittest.TestCase):
         routing.run([routing.url_for(addon.show_recommendations, storefront=STOREFRONT_MAIN), '0', ''])
         routing.run([routing.url_for(addon.show_recommendations_category,
                                      storefront=STOREFRONT_MAIN,
-                                     category='5d07c416-dc08-4e5b-a3d2-8134121b6bd4'), '0', ''])  # Aanbevolen voor jou
+                                     category='cae1712c-e4ad-40fb-965f-757179a47365'), '0', ''])  # Toptitels van het moment
 
     def test_catalog_mylist_menu(self):
         routing.run([routing.url_for(addon.show_mylist), '0', ''])
