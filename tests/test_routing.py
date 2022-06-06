@@ -34,6 +34,9 @@ class TestRouting(unittest.TestCase):
     def test_index(self):
         routing.run([routing.url_for(addon.index), '0', ''])
 
+    def test_clear_cache(self):
+        routing.run([routing.url_for(addon.auth_clear_cache), '0', ''])
+
     def test_main_menu(self):
         routing.run([routing.url_for(addon.show_main_menu), '0', ''])
 
