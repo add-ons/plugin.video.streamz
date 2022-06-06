@@ -168,7 +168,7 @@ class Api:
         else:
             movie = None
 
-        if movie is None:
+        if not movie:
             # Fetch from API
             response = util.http_get(API_ENDPOINT + '/%s/movies/%s' % (self._mode(), movie_id),
                                      token=self._tokens.access_token,
@@ -209,7 +209,7 @@ class Api:
         else:
             program = None
 
-        if program is None:
+        if not program:
             # Fetch from API
             response = util.http_get(API_ENDPOINT + '/%s/programs/%s' % (self._mode(), program_id),
                                      token=self._tokens.access_token,
