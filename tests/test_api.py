@@ -14,6 +14,7 @@ from resources.lib.streamz.auth import Auth
 from resources.lib.streamz.exceptions import UnavailableException
 
 
+@unittest.skipUnless(kodiutils.get_setting('username') and kodiutils.get_setting('password'), 'Skipping since we have no credentials.')
 class TestApi(unittest.TestCase):
     """ Tests for Streamz API """
 
