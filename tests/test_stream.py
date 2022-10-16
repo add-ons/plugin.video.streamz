@@ -19,6 +19,7 @@ from resources.lib.streamz.stream import ResolvedStream, Stream
 _LOGGER = logging.getLogger(__name__)
 
 
+@unittest.skipUnless(kodiutils.get_setting('username') and kodiutils.get_setting('password'), 'Skipping since we have no credentials.')
 class TestStream(unittest.TestCase):
 
     @classmethod
