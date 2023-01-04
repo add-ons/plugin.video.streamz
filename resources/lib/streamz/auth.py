@@ -123,7 +123,7 @@ class Auth:
         self._account.refresh_token = auth_info.get('refresh_token')
 
         # Fetch an actual token we can use
-        response = util.http_post('https://lfvp-api.dpgmedia.net/streamz/tokens', data={
+        response = util.http_post('https://lfvp-api.dpgmedia.net/STREAMZ/tokens', data={
             'device': {
                 'id': str(uuid.uuid4()),
                 'name': 'Streamz Addon on Kodi',
@@ -147,7 +147,7 @@ class Auth:
             return self._account
 
         # We can refresh our old token so it's valid again
-        response = util.http_post('https://lfvp-api.dpgmedia.net/streamz/tokens/refresh', data={
+        response = util.http_post('https://lfvp-api.dpgmedia.net/STREAMZ/tokens/refresh', data={
             'lfvpToken': self._account.access_token,
         })
 
@@ -164,9 +164,9 @@ class Auth:
 
         return self._account
 
-    def get_profiles(self, products='STREAMZ,STREAMZ_KIDS'):
+    def get_profiles(self):
         """ Returns the available profiles """
-        response = util.http_get(API_ENDPOINT + '/profiles', {'products': products}, token=self._account.access_token)
+        response = util.http_get(API_ENDPOINT + '/STREAMZ/profiles', token=self._account.access_token)
         result = json.loads(response.text)
 
         profiles = [
@@ -179,7 +179,7 @@ class Auth:
                 color=profile.get('color', {}).get('start'),
                 color2=profile.get('color', {}).get('end'),
             )
-            for profile in result
+            for profile in result.get('profiles')
         ]
 
         return profiles
