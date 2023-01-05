@@ -200,13 +200,13 @@ class Menu:
                 context_menu = [(
                     kodiutils.localize(30101),  # Remove from My List
                     'Container.Update(%s)' %
-                    kodiutils.url_for('mylist_del', video_type=CONTENT_TYPE_MOVIE, content_id=item.movie_id)
+                    kodiutils.url_for('mylist_del', content_id=item.movie_id)
                 )]
             else:
                 context_menu = [(
                     kodiutils.localize(30100),  # Add to My List
                     'Container.Update(%s)' %
-                    kodiutils.url_for('mylist_add', video_type=CONTENT_TYPE_MOVIE, content_id=item.movie_id)
+                    kodiutils.url_for('mylist_add', content_id=item.movie_id)
                 )]
 
             info_dict.update({
@@ -249,13 +249,13 @@ class Menu:
                 context_menu = [(
                     kodiutils.localize(30101),  # Remove from My List
                     'Container.Update(%s)' %
-                    kodiutils.url_for('mylist_del', video_type=CONTENT_TYPE_PROGRAM, content_id=item.program_id)
+                    kodiutils.url_for('mylist_del', content_id=item.program_id)
                 )]
             else:
                 context_menu = [(
                     kodiutils.localize(30100),  # Add to My List
                     'Container.Update(%s)' %
-                    kodiutils.url_for('mylist_add', video_type=CONTENT_TYPE_PROGRAM, content_id=item.program_id)
+                    kodiutils.url_for('mylist_add', content_id=item.program_id)
                 )]
 
             info_dict.update({
