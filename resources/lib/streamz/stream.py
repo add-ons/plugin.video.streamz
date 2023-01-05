@@ -49,6 +49,19 @@ class Stream:
         # Get published urls
         url = stream_info.get('url')
         license_url = stream_info.get('drm', {}).get('com.widevine.alpha', {}).get('licenseUrl')
+        license_provider = stream_info.get('drm', {}).get('com.widevine.alpha', {}).get('provider')
+        if license_provider == 'drmtoday':
+            license_key = self.create_license_key(
+                license_url,
+                key_headers={
+                    'x-dt-auth-token': stream_info.get('drm', {}).get('com.widevine.alpha', {}).get('drmtoday', {}).get('authToken'),
+                    'Content-Type': 'application/octet-stream',
+                },
+                response_value='JBlicense'
+            )
+        else:
+            # anvato
+            license_key = self.create_license_key(license_url)
 
         # Extract subtitles from our video_info
         subtitle_info = self._extract_subtitles_from_stream_info(video_info)
@@ -64,7 +77,7 @@ class Stream:
                 duration=video_info['video']['duration'],
                 url=url,
                 subtitles=subtitles,
-                license_url=license_url,
+                license_key=license_key,
             )
 
         if stream_type == 'movies':
@@ -74,7 +87,7 @@ class Stream:
                 duration=video_info['video']['duration'],
                 url=url,
                 subtitles=subtitles,
-                license_url=license_url,
+                license_key=license_key,
             )
 
         raise Exception('Unknown video type {type}'.format(type=stream_type))
@@ -101,22 +114,22 @@ class Stream:
         url = 'https://videoplayer-service.api.persgroep.cloud/config/%s/%s' % (strtype, stream_id)
         _LOGGER.debug('Getting video info from %s', url)
         response = util.http_post(url,
-                                 params={
-                                     'startPosition': '0.0',
-                                     'autoPlay': 'true',
-                                 },
-                                 data={
-                                     "deviceType": "android-phone",
-                                     "zone": "streamz"
-                                 },
-                                 headers={
-                                     'Accept': 'application/json',
-                                     'x-api-key': self._API_KEY,
-                                     # 'x-dpg-correlation-id': '',
-                                     'Popcorn-SDK-Version': '6',
-                                     'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 6.0.1; MotoG3 Build/MPIS24.107-55-2-17)',
-                                     'Authorization': 'Bearer ' + player_token,
-                                 })
+                                  params={
+                                      'startPosition': '0.0',
+                                      'autoPlay': 'true',
+                                  },
+                                  data={
+                                      "deviceType": "android-phone",
+                                      "zone": "streamz"
+                                  },
+                                  headers={
+                                      'Accept': 'application/json',
+                                      'x-api-key': self._API_KEY,
+                                      # 'x-dpg-correlation-id': '',
+                                      'Popcorn-SDK-Version': '6',
+                                      'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 6.0.1; MotoG3 Build/MPIS24.107-55-2-17)',
+                                      'Authorization': 'Bearer ' + player_token,
+                                  })
 
         info = json.loads(response.text)
         return info
@@ -206,13 +219,14 @@ class Stream:
         return downloaded_subtitles
 
     @staticmethod
-    def create_license_key(key_url, key_type='R', key_headers=None, key_value=None):
+    def create_license_key(key_url, key_type='R', key_headers=None, key_value='', response_value=''):
         """ Create a license key string that we need for inputstream.adaptive.
 
         :param str key_url:
         :param str key_type:
         :param dict[str, str] key_headers:
         :param str key_value:
+        :param str response_value:
         :rtype: str
         """
         try:  # Python 3
@@ -231,4 +245,4 @@ class Stream:
                 raise ValueError('Missing D{SSM} placeholder')
             key_value = quote(key_value)
 
-        return '%s|%s|%s|' % (key_url, header, key_value)
+        return '%s|%s|%s|%s' % (key_url, header, key_value, response_value)
