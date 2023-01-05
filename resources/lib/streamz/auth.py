@@ -10,7 +10,7 @@ import uuid
 
 from requests import HTTPError
 
-from resources.lib.streamz import API_ENDPOINT, Profile, util
+from resources.lib.streamz import API_ENDPOINT, PRODUCT_STREAMZ, Profile, util
 from resources.lib.streamz.exceptions import NoLoginException
 
 try:  # Python 3
@@ -155,10 +155,11 @@ class Auth:
         self._account.access_token = json.loads(response.text).get('lfvpToken')
 
         # We always use the main profile
-        # TODO: do something else here
-        profiles = self.get_profiles()
-        self._account.profile = profiles[0].key
-        self._account.product = profiles[0].product
+        if not self._account.profile:
+            profiles = self.get_profiles()
+            main_profile = next((p for p in profiles if p.main_profile), None)
+            self._account.profile = main_profile.key
+            self._account.product = PRODUCT_STREAMZ
 
         self._save_cache()
 
@@ -172,12 +173,13 @@ class Auth:
         profiles = [
             Profile(
                 key=profile.get('id'),
-                product=profile.get('product'),
                 name=profile.get('name'),
                 gender=profile.get('gender'),
                 birthdate=profile.get('birthDate'),
                 color=profile.get('color', {}).get('start'),
                 color2=profile.get('color', {}).get('end'),
+                main_profile=profile.get('mainProfile'),
+                kids_profile=profile.get('kidsProfile'),
             )
             for profile in result.get('profiles')
         ]

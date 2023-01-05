@@ -36,7 +36,7 @@ class Api:
 
     def _mode(self):
         """ Return the mode that should be used for API calls. """
-        return 'streamz-kids' if self._tokens.product == PRODUCT_STREAMZ_KIDS else 'streamz'
+        return self._tokens.product
 
     @staticmethod
     def get_config():

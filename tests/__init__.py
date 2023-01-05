@@ -31,4 +31,4 @@ if sys.version_info[0] == 2:
 if os.environ.get('ADDON_TOKEN') and os.environ.get('ADDON_PROFILE'):
     AUTH = Auth(kodiutils.get_tokens_path())
     AUTH.set_token(os.environ.get('ADDON_TOKEN'))
-    AUTH.set_profile(*os.environ.get('ADDON_PROFILE').split(':'))
+    AUTH.set_profile(os.environ.get('ADDON_PROFILE'), 'STREAMZ')
