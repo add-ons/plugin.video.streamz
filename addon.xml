@@ -12,7 +12,6 @@
     <extension point="xbmc.python.pluginsource" library="addon_entry.py">
         <provides>video</provides>
     </extension>
-    <extension point="xbmc.service" library="service_entry.py"/>
     <extension point="xbmc.addon.metadata">
         <summary lang="en_GB">Access the Streamz catalogue</summary>
         <description lang="en_GB">Streamz is a video-on-demand platform offering Flemish content from DPG Media, Telenet and VRT, but also including 'Home of HBO' content and blockbuster movies.</description>
