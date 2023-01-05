@@ -224,7 +224,8 @@ class Api:
             episodes = {}
 
             # Fetch season
-            season_response = util.http_get(API_ENDPOINT + '/%s/detail/%s?selectedSeasonIndex=%s' % (self._mode(), program_id, item_season),                                            token=self._tokens.access_token,
+            season_response = util.http_get(API_ENDPOINT + '/%s/detail/%s?selectedSeasonIndex=%s' % (self._mode(), program_id, item_season),
+                                            token=self._tokens.access_token,
                                             profile=self._tokens.profile)
             season = json.loads(season_response.text).get('selectedSeason')
 
