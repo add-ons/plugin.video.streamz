@@ -7,7 +7,7 @@ import json
 import logging
 
 from resources.lib import kodiutils
-from resources.lib.streamz import API_ANDROID_ENDPOINT, API_ENDPOINT, PRODUCT_STREAMZ_KIDS, Category, Episode, Movie, Program, Season, util
+from resources.lib.streamz import API_ANDROID_ENDPOINT, API_ENDPOINT, Category, Episode, Movie, Program, Season, util
 
 _LOGGER = logging.getLogger(__name__)
 
