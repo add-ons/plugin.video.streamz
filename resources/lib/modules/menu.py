@@ -9,7 +9,6 @@ from resources.lib import kodiutils
 from resources.lib.kodiutils import TitleItem
 from resources.lib.streamz import (PRODUCT_STREAMZ, PRODUCT_STREAMZ_KIDS, STOREFRONT_KIDS, STOREFRONT_MAIN, STOREFRONT_MAIN_KIDS, STOREFRONT_MOVIES,
                                    STOREFRONT_SERIES, Episode, Movie, Program)
-from resources.lib.streamz.api import CONTENT_TYPE_MOVIE, CONTENT_TYPE_PROGRAM
 from resources.lib.streamz.auth import Auth
 
 _LOGGER = logging.getLogger(__name__)
