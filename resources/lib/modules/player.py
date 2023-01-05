@@ -106,10 +106,8 @@ class Player:
             # This allows to play some programs that don't have metadata (yet).
             pass
 
-        license_key = self._stream.create_license_key(resolved_stream.license_url)
-
         # Play this item
-        kodiutils.play(resolved_stream.url, license_key, resolved_stream.title, {}, info_dict, prop_dict, stream_dict, subtitles=resolved_stream.subtitles)
+        kodiutils.play(resolved_stream.url, resolved_stream.license_key, resolved_stream.title, {}, info_dict, prop_dict, stream_dict, subtitles=resolved_stream.subtitles)
 
         # Wait for playback to start
         kodi_player = KodiPlayer()

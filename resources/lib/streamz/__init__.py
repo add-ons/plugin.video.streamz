@@ -219,14 +219,14 @@ class Episode:
 class ResolvedStream:
     """ Defines a stream that we can play"""
 
-    def __init__(self, program=None, program_id=None, title=None, duration=None, url=None, license_url=None, subtitles=None, cookies=None):
+    def __init__(self, program=None, program_id=None, title=None, duration=None, url=None, license_key=None, subtitles=None, cookies=None):
         """
         :type program: str
         :type program_id: str
         :type title: str
         :type duration: str
         :type url: str
-        :type license_url: str
+        :type license_key: str
         :type subtitles: list[str]
         :type cookies: dict
         """
@@ -235,7 +235,7 @@ class ResolvedStream:
         self.title = title
         self.duration = duration
         self.url = url
-        self.license_url = license_url
+        self.license_key = license_key
         self.subtitles = subtitles
         self.cookies = cookies
 
