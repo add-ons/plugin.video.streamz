@@ -8,7 +8,7 @@ import logging
 import os
 
 from resources.lib import kodiutils
-from resources.lib.streamz import API_ENDPOINT, PRODUCT_STREAMZ_KIDS, ResolvedStream, util
+from resources.lib.streamz import API_ENDPOINT, ResolvedStream, util
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -24,7 +24,7 @@ class Stream:
 
     def _mode(self):
         """ Return the mode that should be used for API calls """
-        return 'streamz-kids' if self._tokens.product == PRODUCT_STREAMZ_KIDS else 'streamz'
+        return self._tokens.product
 
     def get_stream(self, stream_type, stream_id):
         """ Return a ResolvedStream based on the stream type and id.
@@ -34,7 +34,7 @@ class Stream:
         :rtype: ResolvedStream
         """
         # We begin with asking the api about the stream info
-        stream_tokens = self._get_stream_tokens(stream_type, stream_id)
+        stream_tokens = self._get_stream_tokens(stream_id)
         player_token = stream_tokens.get('playerToken')
 
         # Return video information
@@ -79,18 +79,12 @@ class Stream:
 
         raise Exception('Unknown video type {type}'.format(type=stream_type))
 
-    def _get_stream_tokens(self, strtype, stream_id):
+    def _get_stream_tokens(self, stream_id):
         """ Get the stream info for the specified stream.
-        :param str strtype:
         :param str stream_id:
         :rtype: dict
         """
-        if strtype == 'movies':
-            url = API_ENDPOINT + '/%s/play/movies/%s' % (self._mode(), stream_id)
-        elif strtype == 'episodes':
-            url = API_ENDPOINT + '/%s/play/episodes/%s' % (self._mode(), stream_id)
-        else:
-            raise Exception('Unknown stream type: %s' % strtype)
+        url = API_ENDPOINT + '/%s/play/%s' % (self._mode(), stream_id)
 
         _LOGGER.debug('Getting stream tokens from %s', url)
         response = util.http_get(url, token=self._tokens.access_token, profile=self._tokens.profile)
@@ -106,16 +100,20 @@ class Stream:
         """
         url = 'https://videoplayer-service.api.persgroep.cloud/config/%s/%s' % (strtype, stream_id)
         _LOGGER.debug('Getting video info from %s', url)
-        response = util.http_get(url,
+        response = util.http_post(url,
                                  params={
                                      'startPosition': '0.0',
                                      'autoPlay': 'true',
+                                 },
+                                 data={
+                                     "deviceType": "android-phone",
+                                     "zone": "streamz"
                                  },
                                  headers={
                                      'Accept': 'application/json',
                                      'x-api-key': self._API_KEY,
                                      # 'x-dpg-correlation-id': '',
-                                     'Popcorn-SDK-Version': '4',
+                                     'Popcorn-SDK-Version': '6',
                                      'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 6.0.1; MotoG3 Build/MPIS24.107-55-2-17)',
                                      'Authorization': 'Bearer ' + player_token,
                                  })

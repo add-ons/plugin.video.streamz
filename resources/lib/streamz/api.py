@@ -7,7 +7,7 @@ import json
 import logging
 
 from resources.lib import kodiutils
-from resources.lib.streamz import API_ANDROID_ENDPOINT, API_ENDPOINT, PRODUCT_STREAMZ_KIDS, Category, Episode, Movie, Program, Season, util
+from resources.lib.streamz import API_ANDROID_ENDPOINT, API_ENDPOINT, Category, Episode, Movie, Program, Season, util
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -36,7 +36,7 @@ class Api:
 
     def _mode(self):
         """ Return the mode that should be used for API calls. """
-        return 'streamz-kids' if self._tokens.product == PRODUCT_STREAMZ_KIDS else 'streamz'
+        return self._tokens.product
 
     @staticmethod
     def get_config():
