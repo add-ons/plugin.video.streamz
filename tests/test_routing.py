@@ -6,11 +6,12 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import logging
+import os
 import unittest
 
 import xbmc
 
-from resources.lib import addon, kodiutils
+from resources.lib import addon
 from resources.lib.streamz import STOREFRONT_MAIN
 
 routing = addon.routing  # pylint: disable=invalid-name
@@ -22,7 +23,7 @@ EXAMPLE_PROGRAM = '6382e070-c284-4538-b60a-44f337ba6157'  # FC De Kampioenen
 EXAMPLE_EPISODE = '7c1c2b5c-de72-45d6-ab88-8dd63edddf43'  # FC De Kampioenen S01E01
 
 
-@unittest.skipUnless(kodiutils.get_setting('username') and kodiutils.get_setting('password'), 'Skipping since we have no credentials.')
+@unittest.skipUnless(os.environ.get('ADDON_TOKEN') and os.environ.get('ADDON_PROFILE'), 'Skipping since we have no credentials.')
 class TestRouting(unittest.TestCase):
     """ Tests for Routing """
 

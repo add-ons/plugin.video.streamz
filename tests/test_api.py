@@ -5,6 +5,7 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import os
 import unittest
 
 from resources.lib import kodiutils
@@ -14,7 +15,7 @@ from resources.lib.streamz.auth import Auth
 from resources.lib.streamz.exceptions import UnavailableException
 
 
-@unittest.skipUnless(kodiutils.get_setting('username') and kodiutils.get_setting('password'), 'Skipping since we have no credentials.')
+@unittest.skipUnless(os.environ.get('ADDON_TOKEN') and os.environ.get('ADDON_PROFILE'), 'Skipping since we have no credentials.')
 class TestApi(unittest.TestCase):
     """ Tests for Streamz API """
 

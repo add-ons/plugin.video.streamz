@@ -6,6 +6,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import logging
+import os
 import unittest
 
 import xbmc
@@ -19,7 +20,7 @@ from resources.lib.streamz.stream import ResolvedStream, Stream
 _LOGGER = logging.getLogger(__name__)
 
 
-@unittest.skipUnless(kodiutils.get_setting('username') and kodiutils.get_setting('password'), 'Skipping since we have no credentials.')
+@unittest.skipUnless(os.environ.get('ADDON_TOKEN') and os.environ.get('ADDON_PROFILE'), 'Skipping since we have no credentials.')
 class TestStream(unittest.TestCase):
 
     @classmethod
