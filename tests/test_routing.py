@@ -18,7 +18,7 @@ routing = addon.routing  # pylint: disable=invalid-name
 
 _LOGGER = logging.getLogger(__name__)
 
-EXAMPLE_MOVIE = '9f33cbca-0321-4a2f-9ac4-374ff69e2c4e'  # Gooische Vrouwen 2
+EXAMPLE_MOVIE = 'f384c9f1-e2dc-4f82-9954-a3f91589385a'  # Niet schieten
 EXAMPLE_PROGRAM = '6382e070-c284-4538-b60a-44f337ba6157'  # FC De Kampioenen
 EXAMPLE_EPISODE = '7c1c2b5c-de72-45d6-ab88-8dd63edddf43'  # FC De Kampioenen S01E01
 
