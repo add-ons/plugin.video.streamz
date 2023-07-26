@@ -8,6 +8,7 @@ disable=
     line-too-long,
     no-init,
     old-style-class,
+    super-with-arguments,
     too-few-public-methods,
     too-many-arguments,
     too-many-branches,
@@ -22,3 +23,4 @@ disable=
     raise-missing-from, # Python 2.7 compatibility
     consider-using-f-string, # Python 2.7 compatibility
     unspecified-encoding, # Python 2.7 compatibility
+    consider-iterating-dictionary, # Python 2.7 compatibility
