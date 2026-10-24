@@ -8,7 +8,7 @@ import logging
 from resources.lib import kodiutils
 from resources.lib.kodiutils import TitleItem
 from resources.lib.modules.menu import Menu
-from resources.lib.streamz import STOREFRONT_MAIN, STOREFRONT_MOVIES, STOREFRONT_PAGE_CONTINUE_WATCHING, STOREFRONT_SERIES, Category
+from resources.lib.streamz import STOREFRONT_MAIN, STOREFRONT_MOVIES, STOREFRONT_SERIES, Category, Movie
 from resources.lib.streamz.api import CACHE_PREVENT, Api
 from resources.lib.streamz.auth import Auth
 from resources.lib.streamz.exceptions import UnavailableException
@@ -24,13 +24,33 @@ class Catalog:
         auth = Auth(kodiutils.get_tokens_path())
         self._api = Api(auth.get_tokens())
 
-    def show_program(self, program):
+    def show_detail(self, detail):
+        """ Show a detail page. A Program shows its seasons, a Movie shows a single playable item.
+
+        :type detail: str
+        """
+        try:
+            detail_obj = self._api.get_detail(detail, cache=CACHE_PREVENT)  # Use CACHE_PREVENT since we want fresh data
+        except UnavailableException:
+            kodiutils.ok_dialog(message=kodiutils.localize(30712))  # The video is unavailable and can't be played right now.
+            kodiutils.end_of_directory()
+            return
+
+        if isinstance(detail_obj, Movie):
+            kodiutils.show_listing([Menu.generate_titleitem(detail_obj)], detail_obj.name, content='movies')
+            return
+
+        self.show_program(detail, program_obj=detail_obj)
+
+    def show_program(self, program, program_obj=None):
         """ Show a program from the catalog.
 
         :type program: str
+        :type program_obj: Program
          """
         try:
-            program_obj = self._api.get_program(program, cache=CACHE_PREVENT)  # Use CACHE_PREVENT since we want fresh data
+            if program_obj is None:
+                program_obj = self._api.get_program(program, cache=CACHE_PREVENT)  # Use CACHE_PREVENT since we want fresh data
         except UnavailableException:
             kodiutils.ok_dialog(message=kodiutils.localize(30712))  # The video is unavailable and can't be played right now.
             kodiutils.end_of_directory()
@@ -201,7 +221,11 @@ class Catalog:
 
     def show_continuewatching(self):
         """ Show the items in "Continue Watching". """
-        category = self._api.get_storefront_category(STOREFRONT_MAIN, STOREFRONT_PAGE_CONTINUE_WATCHING)
+        category_id = self._api.get_continue_watching_id()
+        if not category_id:
+            kodiutils.show_listing([], 30019, content='episodes')
+            return
+        category = self._api.get_storefront_category(STOREFRONT_MAIN, category_id)
 
         listing = []
         for item in category.content:

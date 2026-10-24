@@ -9,7 +9,7 @@ import os
 import unittest
 
 from resources.lib import kodiutils
-from resources.lib.streamz import STOREFRONT_MAIN, STOREFRONT_MOVIES, STOREFRONT_PAGE_CONTINUE_WATCHING, STOREFRONT_SERIES, Episode, Movie, Program
+from resources.lib.streamz import STOREFRONT_MAIN, STOREFRONT_MOVIES, STOREFRONT_SERIES, Episode, Movie, Program
 from resources.lib.streamz.api import Api
 from resources.lib.streamz.auth import Auth
 from resources.lib.streamz.exceptions import UnavailableException
@@ -43,7 +43,10 @@ class TestApi(unittest.TestCase):
         self.assertIsInstance(serie_recommendations, list)
 
     def test_continuewatching(self):
-        result = self.api.get_storefront_category(STOREFRONT_MAIN, STOREFRONT_PAGE_CONTINUE_WATCHING)
+        category_id = self.api.get_continue_watching_id()
+        if category_id is None:
+            self.skipTest('No "Continue watching" row for this profile')
+        result = self.api.get_storefront_category(STOREFRONT_MAIN, category_id)
         self.assertIsInstance(result.content, list)
 
     def test_mylist(self):

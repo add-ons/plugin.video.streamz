@@ -6,7 +6,6 @@ from __future__ import absolute_import, division, unicode_literals
 import json
 import logging
 import os
-import uuid
 
 from requests import HTTPError
 
@@ -91,7 +90,7 @@ class Auth:
         """ Start the authorization flow. """
         response = util.http_post('https://login.streamz.be/oauth/device/code', form={
             'client_id': self.CLIENT_ID,
-            'scope': 'openid',
+            'scope': 'openid offline_access',
         })
         auth_info = json.loads(response.text)
 
@@ -117,22 +116,18 @@ class Auth:
                 return False
             raise
 
-        # Store these tokens
+        # Store these tokens. The access token from login.streamz.be is encrypted (not a JWT) and
+        # is refused by the DPG API, so we authenticate with the signed id token instead.
         auth_info = json.loads(response.text)
         self._account.id_token = auth_info.get('id_token')
+        self._account.access_token = self._account.id_token
         self._account.refresh_token = auth_info.get('refresh_token')
+        self._save_cache()
 
-        # Fetch an actual token we can use
-        response = util.http_post('https://lfvp-api.dpgmedia.net/STREAMZ/tokens', data={
-            'device': {
-                'id': str(uuid.uuid4()),
-                'name': 'Streamz Addon on Kodi',
-            },
+        # Register the id token with the DPG API
+        util.http_post(API_ENDPOINT + '/STREAMZ/id-token', data={
             'idToken': self._account.id_token,
         })
-
-        self._account.access_token = json.loads(response.text).get('lfvpToken')
-        self._save_cache()
 
         return True
 
@@ -142,17 +137,23 @@ class Auth:
         if not self._account.access_token:
             return None
 
-        # Return our current token if it is still valid.
-        if self._account.is_valid_token() and self._account.profile and self._account.product:
+        # Refresh the OAuth access token when it has expired
+        if not self._account.is_valid_token():
+            if not self._account.refresh_token:
+                raise NoLoginException
+            response = util.http_post('https://login.streamz.be/oauth/token', form={
+                'refresh_token': self._account.refresh_token,
+                'client_id': self.CLIENT_ID,
+                'grant_type': 'refresh_token',
+            })
+            auth_info = json.loads(response.text)
+            self._account.id_token = auth_info.get('id_token')
+            self._account.access_token = self._account.id_token
+            self._account.refresh_token = auth_info.get('refresh_token', self._account.refresh_token)
+            self._save_cache()
+
+        if self._account.profile and self._account.product:
             return self._account
-
-        # We can refresh our old token so it's valid again
-        response = util.http_post('https://lfvp-api.dpgmedia.net/STREAMZ/tokens/refresh', data={
-            'lfvpToken': self._account.access_token,
-        })
-
-        # Get JWT from reply
-        self._account.access_token = json.loads(response.text).get('lfvpToken')
 
         # We always use the main profile
         if not self._account.profile:
@@ -178,8 +179,8 @@ class Auth:
                 birthdate=profile.get('birthDate'),
                 color=profile.get('color', {}).get('start'),
                 color2=profile.get('color', {}).get('end'),
-                main_profile=profile.get('mainProfile'),
-                kids_profile=profile.get('kidsProfile'),
+                main_profile=profile.get('mainProfile', profile.get('type') == 'MAIN'),
+                kids_profile=profile.get('kidsProfile', profile.get('type') == 'KIDS'),
             )
             for profile in result.get('profiles')
         ]

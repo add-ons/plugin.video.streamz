@@ -63,6 +63,13 @@ def auth_clear_cache():
     Authentication().clear_cache()
 
 
+@routing.route('/catalog/detail/<detail>')
+def show_catalog_detail(detail):
+    """ Show a detail page that can be a Movie or a Program """
+    from resources.lib.modules.catalog import Catalog
+    Catalog().show_detail(detail)
+
+
 @routing.route('/catalog/program/<program>')
 def show_catalog_program(program):
     """ Show a program from the catalog """

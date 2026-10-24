@@ -36,8 +36,15 @@ class Player:
             return
 
         try:
+            # Movies are opened by their detail id, but are played by their playable id
+            stream_id = item
+            if category in ['movies', 'oneoffs']:
+                movie = self._api.get_movie(item)
+                if movie and movie.playable_id:
+                    stream_id = movie.playable_id
+
             # Get stream information
-            resolved_stream = self._stream.get_stream(category, item)
+            resolved_stream = self._stream.get_stream(category, stream_id)
 
         except UnavailableException:
             kodiutils.ok_dialog(message=kodiutils.localize(30712))  # The video is unavailable...

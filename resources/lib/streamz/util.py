@@ -32,11 +32,11 @@ class StreamzAdapter(BaseAdapter):
 # Setup a static session that can be reused for all calls
 SESSION = requests.Session()
 SESSION.headers = {
-    'User-Agent': 'STREAMZ/15.231023 (be.vmma.streamz; build:18041; Android 23) okhttp/4.11.0',
-    'x-app-version': '15',
-    'x-persgroep-mobile-app': 'true',
-    'x-persgroep-os': 'android',
-    'x-persgroep-os-version': '28',
+    'Accept': 'application/json;image/webp',
+    'Accept-Encoding': 'gzip',
+    'User-Agent': 'STREAMZ/28.260923 (be.vmma.streamz; build:37208; Android TV 28) okhttp/4.12.0',
+    'x-app-version': '28',
+    'lfvp-device-segment': 'TV>Android',
 }
 PROXIES = kodiutils.get_proxies()
 
@@ -166,7 +166,7 @@ def _request(method, url, params=None, form=None, data=None, token=None, profile
         headers = {}
 
     if token:
-        headers['lfvp-auth'] = token
+        headers['Authorization'] = 'Bearer ' + token
 
     if profile:
         headers['x-dpp-profile'] = profile

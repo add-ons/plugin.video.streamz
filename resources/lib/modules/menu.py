@@ -8,7 +8,7 @@ import logging
 from resources.lib import kodiutils
 from resources.lib.kodiutils import TitleItem
 from resources.lib.streamz import (PRODUCT_STREAMZ, PRODUCT_STREAMZ_KIDS, STOREFRONT_KIDS, STOREFRONT_MAIN, STOREFRONT_MAIN_KIDS, STOREFRONT_MOVIES,
-                                   STOREFRONT_SERIES, Episode, Movie, Program)
+                                   STOREFRONT_SERIES, Episode, Movie, Program, Teaser)
 from resources.lib.streamz.auth import Auth
 
 _LOGGER = logging.getLogger(__name__)
@@ -238,6 +238,32 @@ class Menu:
                 prop_dict=prop_dict,
                 context_menu=context_menu,
                 is_playable=True,
+            )
+
+        #
+        # Teaser (a Movie or a Program, we only know once we open it)
+        #
+        if isinstance(item, Teaser):
+            if item.my_list:
+                context_menu = [(
+                    kodiutils.localize(30101),  # Remove from My List
+                    'Container.Update(%s)' %
+                    kodiutils.url_for('mylist_del', content_id=item.detail_id)
+                )]
+            else:
+                context_menu = [(
+                    kodiutils.localize(30100),  # Add to My List
+                    'Container.Update(%s)' %
+                    kodiutils.url_for('mylist_add', content_id=item.detail_id)
+                )]
+
+            return TitleItem(
+                title=item.name,
+                path=kodiutils.url_for('show_catalog_detail', detail=item.detail_id),
+                art_dict=art_dict,
+                info_dict=info_dict,
+                prop_dict=prop_dict,
+                context_menu=context_menu,
             )
 
         #

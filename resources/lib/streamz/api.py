@@ -7,7 +7,7 @@ import json
 import logging
 
 from resources.lib import kodiutils
-from resources.lib.streamz import API_ANDROID_ENDPOINT, API_ENDPOINT, Category, Episode, Movie, Program, Season, util
+from resources.lib.streamz import API_ANDROID_ENDPOINT, API_ENDPOINT, STOREFRONT_MAIN, Category, Episode, Movie, Program, Season, Teaser, util
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -23,6 +23,8 @@ CACHE_PREVENT = 3  # Don't use the cache
 CONTENT_TYPE_MOVIE = 'MOVIE'
 CONTENT_TYPE_PROGRAM = 'PROGRAM'
 CONTENT_TYPE_EPISODE = 'EPISODE'
+
+ROW_TYPES_CATEGORY = ['SWIMLANE_DEFAULT', 'SWIMLANE_PORTRAIT', 'SWIMLANE_LANDSCAPE', 'SWIMLANE_TOP10', 'CONTINUE_WATCHING']
 
 
 class Api:
@@ -51,43 +53,49 @@ class Api:
         """ Returns a storefront.
 
          :param str storefront:         The ID of the storefront.
-         :rtype: list[Category|Program|Movie]
+         :rtype: list[Category|Teaser]
          """
-        response = util.http_get(API_ENDPOINT + '/%s/storefronts/%s' % (self._mode(), storefront),
-                                 token=self._tokens.access_token,
-                                 profile=self._tokens.profile)
-        result = json.loads(response.text)
+        result = self._get_storefront_json(storefront)
 
         items = []
         for row in result.get('rows', []):
-            if row.get('rowType') in ['SWIMLANE_DEFAULT', 'SWIMLANE_PORTRAIT', 'SWIMLANE_LANDSCAPE']:
+            if row.get('rowType') in ROW_TYPES_CATEGORY:
                 items.append(Category(
                     category_id=row.get('id'),
-                    title=row.get('title'),
+                    title=(row.get('title') or '').strip(),
                 ))
                 continue
 
             if row.get('rowType') == 'CAROUSEL':
-                for item in row.get('teasers'):
-                    if item.get('target', {}).get('type') == CONTENT_TYPE_MOVIE:
-                        items.append(self._parse_movie_teaser(item))
-
-                    elif item.get('target', {}).get('type') == CONTENT_TYPE_PROGRAM:
-                        items.append(self._parse_program_teaser(item))
+                items.extend(self._parse_teaser(item) for item in row.get('teasers', []))
                 continue
 
             if row.get('rowType') in ['TOP_BANNER', 'MARKETING_BLOCK']:
-                item = row.get('teaser')
-                if item.get('target', {}).get('type') == CONTENT_TYPE_MOVIE:
-                    items.append(self._parse_movie_teaser(item))
-
-                elif item.get('target', {}).get('type') == CONTENT_TYPE_PROGRAM:
-                    items.append(self._parse_program_teaser(item))
+                if row.get('teaser'):
+                    items.append(self._parse_teaser(row.get('teaser')))
                 continue
 
             _LOGGER.debug('Skipping recommendation %s with type %s', row.get('title'), row.get('rowType'))
 
-        return items
+        return [item for item in items if item]
+
+    def get_continue_watching_id(self):
+        """ Returns the ID of the "Continue watching" row on the main storefront, or None.
+
+        :rtype: str
+        """
+        result = self._get_storefront_json(STOREFRONT_MAIN)
+        for row in result.get('rows', []):
+            if row.get('rowType') == 'CONTINUE_WATCHING':
+                return row.get('id')
+        return None
+
+    def _get_storefront_json(self, storefront):
+        """ Fetch the raw json of a storefront. """
+        response = util.http_get(API_ENDPOINT + '/%s/storefronts/%s' % (self._mode(), storefront),
+                                 token=self._tokens.access_token,
+                                 profile=self._tokens.profile)
+        return json.loads(response.text)
 
     def get_storefront_category(self, storefront, category):
         """ Returns a storefront.
@@ -101,18 +109,9 @@ class Api:
                                  profile=self._tokens.profile)
         result = json.loads(response.text)
 
-        items = []
-        for item in result.get('row', {}).get('teasers', []):
-            if item.get('target', {}).get('type') == CONTENT_TYPE_MOVIE:
-                items.append(self._parse_movie_teaser(item))
+        items = [self._parse_teaser(item) for item in result.get('row', {}).get('teasers', [])]
 
-            elif item.get('target', {}).get('type') == CONTENT_TYPE_PROGRAM:
-                items.append(self._parse_program_teaser(item))
-
-            elif item.get('target', {}).get('type') == CONTENT_TYPE_EPISODE:
-                items.append(self._parse_episode_teaser(item))
-
-        return Category(category_id=category, title=result.get('row', {}).get('title'), content=items)
+        return Category(category_id=category, title=result.get('row', {}).get('title'), content=[item for item in items if item])
 
     def get_mylist(self, content_filter=None, cache=CACHE_ONLY):
         """ Returns the contents of My List """
@@ -126,18 +125,11 @@ class Api:
 
         result = json.loads(response.text)
 
-        items = []
-        for item in result.get('teasers'):
-            if item.get('target', {}).get('type') == CONTENT_TYPE_MOVIE and content_filter in [None, Movie]:
-                items.append(self._parse_movie_teaser(item, cache=cache))
+        items = [self._parse_teaser(item, cache=cache) for item in result.get('teasers', [])]
+        if content_filter:
+            items = [item for item in items if isinstance(item, content_filter)]
 
-            elif item.get('target', {}).get('type') == CONTENT_TYPE_PROGRAM and content_filter in [None, Program]:
-                items.append(self._parse_program_teaser(item, cache=cache))
-
-            elif item.get('target', {}).get('type') == CONTENT_TYPE_EPISODE and content_filter in [None, Episode]:
-                items.append(self._parse_episode_teaser(item, cache=cache))
-
-        return items
+        return [item for item in items if item]
 
     def add_mylist(self, content_id):
         """ Add an item to My List. """
@@ -153,6 +145,29 @@ class Api:
                          profile=self._tokens.profile)
         kodiutils.set_cache(['swimlane', 'my-list'], None)
 
+    def get_detail(self, detail_id, cache=CACHE_AUTO):
+        """ Get the details of the specified detail page. Returns a Movie or a Program, or None
+        when only the cache may be used and nothing is cached.
+
+        :type detail_id: str
+        :type cache: int
+        :rtype Movie|Program
+        """
+        detail = None
+        if cache in [CACHE_AUTO, CACHE_ONLY]:
+            detail = kodiutils.get_cache(['detail', detail_id])
+            if detail is None and cache == CACHE_ONLY:
+                return None
+
+        if not detail:
+            detail = self._get_detail_json(detail_id)
+            kodiutils.set_cache(['detail', detail_id], detail)
+
+        if detail.get('seasonPicker') is None:
+            return self._parse_movie_detail(detail)
+
+        return self._parse_program_detail(detail_id, detail)
+
     def get_movie(self, movie_id, cache=CACHE_AUTO):
         """ Get the details of the specified movie.
 
@@ -160,39 +175,8 @@ class Api:
         :type cache: int
         :rtype Movie
         """
-        if cache in [CACHE_AUTO, CACHE_ONLY]:
-            # Try to fetch from cache
-            movie = kodiutils.get_cache(['movie', movie_id])
-            if movie is None and cache == CACHE_ONLY:
-                return None
-        else:
-            movie = None
-
-        if not movie:
-            # Fetch from API
-            response = util.http_get(API_ENDPOINT + '/%s/detail/%s' % (self._mode(), movie_id),
-                                     token=self._tokens.access_token,
-                                     profile=self._tokens.profile)
-            movie = json.loads(response.text)
-            kodiutils.set_cache(['movie', movie_id], movie)
-
-        return Movie(
-            movie_id=movie.get('id'),
-            name=movie.get('name'),
-            description=movie.get('description'),
-            duration=movie.get('durationSeconds'),
-            poster=movie.get('portraitTeaserImageUrl'),
-            thumb=movie.get('landscapeTeaserImageUrl'),
-            fanart=movie.get('backgroundImageUrl'),
-            year=movie.get('productionYear'),
-            geoblocked=movie.get('blockedFor') == 'GEO',
-            remaining=movie.get('remainingDaysAvailable'),
-            legal=movie.get('legalIcons'),
-            # aired=movie.get('broadcastTimestamp'),
-            channel=self._parse_channel(movie.get('channelLogoUrl')),
-            # my_list=program.get('addedToMyList'),  # Don't use addedToMyList, since we might have cached this info
-            available=movie.get('blockedFor') != 'SUBSCRIPTION',
-        )
+        detail = self.get_detail(movie_id, cache=cache)
+        return detail if isinstance(detail, Movie) else None
 
     def get_program(self, program_id, cache=CACHE_AUTO):
         """ Get the details of the specified program.
@@ -201,76 +185,95 @@ class Api:
         :type cache: int
         :rtype Program
         """
-        if cache in [CACHE_AUTO, CACHE_ONLY]:
-            # Try to fetch from cache
-            program = kodiutils.get_cache(['program', program_id])
-            if program is None and cache == CACHE_ONLY:
-                return None
-        else:
-            program = None
+        detail = self.get_detail(program_id, cache=cache)
+        return detail if isinstance(detail, Program) else None
 
-        if not program:
-            # Fetch from API
-            response = util.http_get(API_ENDPOINT + '/%s/detail/%s' % (self._mode(), program_id),
-                                     token=self._tokens.access_token,
-                                     profile=self._tokens.profile)
-            program = json.loads(response.text)
-            kodiutils.set_cache(['program', program_id], program)
+    def _get_detail_json(self, detail_id, season_index=None):
+        """ Fetch the raw json of a detail page, optionally for a specific season. """
+        url = API_ENDPOINT + '/%s/detail3/%s' % (self._mode(), detail_id)
+        if season_index is not None:
+            url += '?selectedSeasonIndex=%s' % season_index
+        response = util.http_get(url, token=self._tokens.access_token, profile=self._tokens.profile)
+        return json.loads(response.text)
 
-        channel = self._parse_channel(program.get('channelLogoUrl'))
+    @staticmethod
+    def _parse_year(detail):
+        """ Return the production year from the header labels, if there is one. """
+        for label in detail.get('headerLabels') or []:
+            text = (label.get('label') or '').strip()
+            if len(text) == 4 and text.isdigit():
+                return int(text)
+        return None
+
+    def _parse_movie_detail(self, movie):
+        """ Parse a detail page of a movie. """
+        return Movie(
+            movie_id=movie.get('id'),
+            playable_id=(movie.get('primaryButton') or {}).get('playableId'),
+            name=(movie.get('title') or {}).get('label'),
+            description=movie.get('description'),
+            duration=movie.get('durationSeconds'),
+            thumb=movie.get('landscapeTeaserImageUrl'),
+            fanart=movie.get('backgroundImageUrl'),
+            year=self._parse_year(movie),
+            my_list=movie.get('addedToMyList'),
+            available=bool((movie.get('primaryButton') or {}).get('playableId')),
+        )
+
+    def _parse_program_detail(self, program_id, program):
+        """ Parse a detail page of a program, fetching every season. """
+        name = (program.get('title') or {}).get('label')
+        picker = program.get('seasonPicker') or {}
+        selected = picker.get('selected') or {}
 
         seasons = {}
-        for item_season in program.get('seasonIndices', []):
+        for season_index in picker.get('indices', []):
+            if season_index == selected.get('index'):
+                season = selected
+            else:
+                season = (self._get_detail_json(program_id, season_index).get('seasonPicker') or {}).get('selected') or {}
+
             episodes = {}
-
-            # Fetch season
-            season_response = util.http_get(API_ENDPOINT + '/%s/detail/%s?selectedSeasonIndex=%s' % (self._mode(), program_id, item_season),
-                                            token=self._tokens.access_token,
-                                            profile=self._tokens.profile)
-            season = json.loads(season_response.text).get('selectedSeason')
-
             for item_episode in season.get('episodes', []):
+                progress = item_episode.get('userProgressPercentage') or 0
+                duration = item_episode.get('durationSeconds') or 0
                 episodes[item_episode.get('index')] = Episode(
                     episode_id=item_episode.get('id'),
                     program_id=program_id,
-                    program_name=program.get('name'),
+                    program_name=name,
                     number=item_episode.get('index'),
-                    season=item_season,
-                    name=item_episode.get('name'),
+                    season=season_index,
+                    name=self._strip_episode_number(item_episode.get('title')),
                     description=item_episode.get('description'),
-                    duration=item_episode.get('durationSeconds'),
+                    duration=duration,
                     thumb=item_episode.get('imageUrl'),
                     fanart=item_episode.get('imageUrl'),
-                    geoblocked=program.get('blockedFor') == 'GEO',
-                    remaining=item_episode.get('remainingDaysAvailable'),
-                    channel=channel,
-                    legal=program.get('legalIcons'),
-                    aired=item_episode.get('broadcastTimestamp'),
-                    progress=item_episode.get('playerPositionSeconds', 0),
-                    watched=item_episode.get('doneWatching', False),
-                    available=item_episode.get('blockedFor') != 'SUBSCRIPTION',
+                    progress=int(duration * progress / 100) if progress < 100 else 0,
+                    watched=progress >= 100,
+                    available=not item_episode.get('blockingOverlayId'),
                 )
 
-            seasons[item_season] = Season(
-                number=item_season,
+            seasons[season_index] = Season(
+                number=season_index,
                 episodes=episodes,
-                channel=channel,
-                legal=program.get('legalIcons'),
             )
 
         return Program(
             program_id=program.get('id'),
-            name=program.get('name'),
+            name=name,
             description=program.get('description'),
             thumb=program.get('landscapeTeaserImageUrl'),
             fanart=program.get('backgroundImageUrl'),
-            geoblocked=program.get('blockedFor') == 'GEO',
             seasons=seasons,
-            channel=channel,
-            legal=program.get('legalIcons'),
-            # my_list=program.get('addedToMyList'),  # Don't use addedToMyList, since we might have cached this info
-            available=program.get('blockedFor') != 'SUBSCRIPTION',
+            my_list=program.get('addedToMyList'),
         )
+
+    @staticmethod
+    def _strip_episode_number(title):
+        """ Episode titles look like "1. Title", remove the number since Kodi shows it already. """
+        if title and '. ' in title and title.split('. ', 1)[0].isdigit():
+            return title.split('. ', 1)[1]
+        return title
 
     @staticmethod
     def get_episode_from_program(program, episode_id):
@@ -344,7 +347,7 @@ class Api:
     def do_search(self, search):
         """ Do a search in the full catalog.
         :type search: str
-        :rtype list[Union[Movie, Program]]
+        :rtype list[Teaser]
         """
         response = util.http_get(API_ENDPOINT + '/%s/search?query=%s' % (self._mode(),
                                                                          kodiutils.to_unicode(quote(kodiutils.from_unicode(search)))),
@@ -354,72 +357,51 @@ class Api:
 
         items = []
         for category in results.get('results', []):
-            for item in category.get('teasers'):
-                if item.get('target', {}).get('type') == CONTENT_TYPE_MOVIE:
-                    items.append(self._parse_movie_teaser(item))
+            items.extend(self._parse_teaser(item) for item in category.get('teasers', []))
+        return [item for item in items if item]
 
-                elif item.get('target', {}).get('type') == CONTENT_TYPE_PROGRAM:
-                    items.append(self._parse_program_teaser(item))
-        return items
+    def _parse_teaser(self, item, cache=CACHE_ONLY):
+        """ Parse a teaser. When the detail page is cached we know if it is a Movie or a Program,
+        otherwise we return a Teaser that resolves the type when opened. Teasers that point to a
+        playable episode (like in "Continue watching") are returned as an Episode.
 
-    def _parse_movie_teaser(self, item, cache=CACHE_ONLY):
-        """ Parse the movie json and return a Movie instance.
         :type item: dict
         :type cache: int
-        :rtype Movie
+        :rtype Movie|Program|Episode|Teaser
         """
-        movie = self.get_movie(item.get('target', {}).get('id'), cache=cache)
-        if movie:
-            movie.available = item.get('blockedFor') != 'SUBSCRIPTION'
-            return movie
+        detail_id = item.get('detailId') or (item.get('target') or {}).get('id')
+        if not detail_id:
+            return None
 
-        return Movie(
-            movie_id=item.get('target', {}).get('id'),
-            name=item.get('title'),
-            thumb=item.get('imageUrl'),
-            geoblocked=item.get('blockedFor') == 'GEO',
-            available=item.get('blockedFor') != 'SUBSCRIPTION',
-        )
+        name = item.get('title')
+        thumb = item.get('imageUrl') or item.get('landscapeImageUrl') or item.get('largeImageUrl')
+        fanart = item.get('heroImageUrl') or thumb
 
-    def _parse_program_teaser(self, item, cache=CACHE_ONLY):
-        """ Parse the program json and return a Program instance.
-        :type item: dict
-        :type cache: int
-        :rtype Program
-        """
-        program = self.get_program(item.get('target', {}).get('id'), cache=cache)
-        if program:
-            program.available = item.get('blockedFor') != 'SUBSCRIPTION'
-            return program
+        if item.get('playableId'):
+            progress = item.get('userProgressPercentage') or 0
+            return Episode(
+                episode_id=item.get('playableId'),
+                program_id=detail_id,
+                program_name=name,
+                name=item.get('seasonLabel') or name,
+                description=item.get('description'),
+                thumb=thumb,
+                fanart=fanart,
+                watched=progress >= 100,
+            )
 
-        return Program(
-            program_id=item.get('target', {}).get('id'),
-            name=item.get('title'),
-            thumb=item.get('imageUrl'),
-            geoblocked=item.get('blockedFor') == 'GEO',
-            available=item.get('blockedFor') != 'SUBSCRIPTION',
-        )
+        detail = self.get_detail(detail_id, cache=cache)
+        if detail:
+            return detail
 
-    def _parse_episode_teaser(self, item, cache=CACHE_ONLY):
-        """ Parse the episode json and return an Episode instance.
-        :type item: dict
-        :type cache: int
-        :rtype Episode
-        """
-        program = self.get_program(item.get('target', {}).get('programId'), cache=cache)
-        episode = self.get_episode_from_program(program, item.get('target', {}).get('id')) if program else None
-
-        return Episode(
-            episode_id=item.get('target', {}).get('id'),
-            program_id=item.get('target', {}).get('programId'),
-            program_name=item.get('title'),
-            name=item.get('label'),
-            description=episode.description if episode else None,
-            geoblocked=item.get('blockedFor') == 'GEO',
-            thumb=item.get('imageUrl'),
-            progress=item.get('playerPositionSeconds'),
-            watched=False,
-            remaining=item.get('remainingDaysAvailable'),
+        return Teaser(
+            detail_id=detail_id,
+            name=name,
+            description=item.get('description'),
+            poster=item.get('portraitImageUrl'),
+            thumb=thumb,
+            fanart=fanart,
+            my_list=item.get('addedToMyList'),
         )
 
     @staticmethod

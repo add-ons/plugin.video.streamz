@@ -8,12 +8,11 @@ API_ANDROID_ENDPOINT = 'https://lfvp-android-api.dpgmedia.net'
 
 # These seem to be hardcoded
 STOREFRONT_MAIN = 'main'
-STOREFRONT_MOVIES = 'movies'
+STOREFRONT_MOVIES = 'films'
 STOREFRONT_SERIES = 'series'
 STOREFRONT_KIDS = 'kids'
 STOREFRONT_MAIN_KIDS = 'main'
 
-STOREFRONT_PAGE_CONTINUE_WATCHING = '7574469c-5d78-4878-84f5-c5729442eee4'
 
 PRODUCT_STREAMZ = 'STREAMZ'
 PRODUCT_STREAMZ_KIDS = 'STREAMZ_KIDS'
@@ -66,7 +65,7 @@ class Movie:
     """ Defines a Movie """
 
     def __init__(self, movie_id=None, name=None, description=None, year=None, poster=None, thumb=None, fanart=None, duration=None,
-                 remaining=None, geoblocked=None, channel=None, legal=None, aired=None, my_list=None, available=True):
+                 remaining=None, geoblocked=None, channel=None, legal=None, aired=None, my_list=None, available=True, playable_id=None):
         """
         :type movie_id: str
         :type name: str
@@ -83,8 +82,10 @@ class Movie:
         :type aired: str
         :type my_list: bool
         :type available: bool
+        :type playable_id: str
         """
         self.movie_id = movie_id
+        self.playable_id = playable_id
         self.name = name
         self.description = description if description else ''
         self.year = year
@@ -97,6 +98,33 @@ class Movie:
         self.channel = channel
         self.legal = legal
         self.aired = aired
+        self.my_list = my_list
+        self.available = available
+
+    def __repr__(self):
+        return "%r" % self.__dict__
+
+
+class Teaser:
+    """ Defines a teaser for a detail page of which we don't know yet if it's a Movie or a Program """
+
+    def __init__(self, detail_id=None, name=None, description=None, poster=None, thumb=None, fanart=None, my_list=None, available=True):
+        """
+        :type detail_id: str
+        :type name: str
+        :type description: str
+        :type poster: str
+        :type thumb: str
+        :type fanart: str
+        :type my_list: bool
+        :type available: bool
+        """
+        self.detail_id = detail_id
+        self.name = name
+        self.description = description if description else ''
+        self.poster = poster
+        self.thumb = thumb
+        self.fanart = fanart
         self.my_list = my_list
         self.available = available
 

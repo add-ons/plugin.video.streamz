@@ -111,23 +111,21 @@ class Stream:
         :param str player_token:
         :rtype: dict
         """
-        url = 'https://videoplayer-service.api.persgroep.cloud/config/%s/%s' % (strtype, stream_id)
-        _LOGGER.debug('Getting video info from %s', url)
+        url = 'https://videoplayer-service.dpgmedia.net/play-config/%s' % stream_id
+        _LOGGER.debug('Getting video info from %s (%s)', url, strtype)
         response = util.http_post(url,
                                   params={
                                       'startPosition': '0.0',
                                       'autoPlay': 'true',
                                   },
                                   data={
-                                      "deviceType": "android-phone",
-                                      "zone": "streamz"
+                                      'deviceType': 'android-tv',
+                                      'zone': 'streamz',
                                   },
                                   headers={
                                       'Accept': 'application/json',
                                       'x-api-key': self._API_KEY,
-                                      # 'x-dpg-correlation-id': '',
-                                      'Popcorn-SDK-Version': '6',
-                                      'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 6.0.1; MotoG3 Build/MPIS24.107-55-2-17)',
+                                      'Popcorn-SDK-Version': '8',
                                       'Authorization': 'Bearer ' + player_token,
                                   })
 
